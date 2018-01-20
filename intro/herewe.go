@@ -1,6 +1,29 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"io/ioutil"
+	"log"
+	"math"
+	"net/http"
+	"os"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+)
+
+/* ------------------------------
+RUNNING THIS FILE
+	- To run this file, install Go and set the environment variable using the following command:
+		export PATH=$PATH:/usr/local/go/bin
+
+	- Then in terminal, navigate to this directory and use either of the following commands:
+		go build && go ./intro
+			or
+		go run herewe.go
+	* http server will be running and listening on localhost:8080
+--------------------------------- */
 
 func main() {
 	/* ------------------------------
@@ -50,7 +73,6 @@ func main() {
 	/* ------------------------------
 	LOGICAL OPERATORS
 		- there are three logical operators inside of go
-
 	--------------------------------- */
 	fmt.Println("-----------------------")
 	println("-  LOGICAL OPERATORS  -")
@@ -117,6 +139,9 @@ func main() {
 	for _, value := range favNums2 {
 		fmt.Println(value)
 	}
+	for value := range favNums2 {
+		fmt.Println(value)
+	}
 
 	numSlice := []int{5, 4, 3, 2, 1}
 	fmt.Println("numSlice = ", numSlice)
@@ -135,9 +160,389 @@ func main() {
 
 	/* ------------------------------
 	MAPS
-		- a slice is like an array, but you don't define the size
+		- a collection of key-value pairs
+		- you can have maps within maps
 	--------------------------------- */
 	fmt.Println("-----------------------")
-	println("-   ARRAYS & SLICES   -")
+	println("-	  MAPS	      -")
 	fmt.Println("-----------------------")
+
+	presAge := make(map[string]int)
+
+	presAge["Theodore Roosevelt"] = 42
+	presAge["John F. Kennedy"] = 38
+	fmt.Println("Key:	Theodore Roosevelt\nValue: ", presAge["Theodore Roosevelt"])
+	fmt.Println("len(presAge): ", len(presAge))
+
+	delete(presAge, "John F. Kennedy")
+	fmt.Println("len(presAge): ", len(presAge))
+
+	/* ------------------------------
+	FUNCTIONS
+		- you can return more than one value with functions
+		- variadic functions are functions that accept an unknown number of values
+		- Go functions may be closures. A closure is a function value that
+			references variables from outside its body.
+	--------------------------------- */
+	fmt.Println("-----------------------")
+	println("-	FUNCTIONS     -")
+	fmt.Println("-----------------------")
+
+	// These functions are defined outside of main. (below)
+	listNums := []float64{1, 2, 3, 4, 5}
+	fmt.Println("Sum :", addThemUp(listNums))
+
+	number1, number2 := next2Values(5)
+	fmt.Println(number1, number2)
+
+	// Variadic function
+	fmt.Println(subtractThem(1, 2, 3, 4, 5))
+
+	// Closures
+	number3 := 3
+	doubleNum := func() int {
+		number3 *= 3
+		return number3
+	}
+	fmt.Println(doubleNum())
+	fmt.Println(doubleNum())
+
+	/* ------------------------------
+	RECURSION
+		- calling a function from inside itself
+	--------------------------------- */
+	fmt.Println("-----------------------")
+	println("-	RECURSION     -")
+	fmt.Println("-----------------------")
+
+	// The function is defined outside of main (below)
+	inputNum := 3
+	fmt.Println("factorial of: ", inputNum, "\n", factorial(inputNum))
+
+	/* ------------------------------
+	DEFER & PANIC
+		- Defer is used to ensure that a function call is performed later
+			in a program’s execution, usually for purposes of cleanup
+		- A panic typically means something went unexpectedly wrong. Mostly
+			we use it to fail fast on errors that shouldn’t occur during
+			normal operation, or that we aren’t prepared to handle gracefully.
+	--------------------------------- */
+	fmt.Println("-----------------------")
+	println("-    DEFER & PANIC    -")
+	fmt.Println("-----------------------")
+
+	// // printTwo() will not run until main() completes
+	// defer printTwo()
+	// printOne()
+
+	// functions defined outside of main (below)
+	fmt.Println(safeDiv(3, 0))
+	fmt.Println(safeDiv(3, 2))
+	demPanic()
+
+	/* ------------------------------
+	POINTERS
+		- Pointers allow you to pass memory addresses and assign values in a
+			different way.
+	--------------------------------- */
+	fmt.Println("-----------------------")
+	println("-      POINTERS     -")
+	fmt.Println("-----------------------")
+
+	x := 0
+	fmt.Println("x Address =", &x)
+	fmt.Println("x =", x)
+	changeXVal(x)
+	fmt.Println("x =", x)
+	changeXValNow(&x)
+	fmt.Println("x =", x)
+
+	yPtr := new(int)
+	fmt.Println("yPtr Address =", yPtr)
+	fmt.Println("yPtr Value = ", *yPtr)
+	changeXValNow(yPtr)
+	fmt.Println("yPtr Value = ", *yPtr)
+
+	/* ------------------------------
+	STRUCTS
+		- Structs allow us to define our own data types and are useful for grouping
+			data together.
+		- Go automatically handles conversion between values and pointers for method
+			calls. You may want to use a pointer receiver type to avoid copying on
+			method calls or to allow the method to mutate the receiving struct.
+	--------------------------------- */
+	fmt.Println("-----------------------")
+	println("- STRUCTS/INTERFACES -")
+	fmt.Println("-----------------------")
+
+	rect1 := Rectangle{0, 50, 10, 10}
+
+	fmt.Println("Rectangle is", rect1.width, "units wide")
+	fmt.Println("Area of rectangle = ", rect1.area())
+
+	squar := Square{20, 50}
+	circ := Circle{4}
+	fmt.Println("Area of Square =", getArea(squar))
+	fmt.Println("Area of Circle =", getArea(circ))
+
+	/* ------------------------------
+	Strings
+	--------------------------------- */
+	fmt.Println("-----------------------")
+	println("-       Strings       -")
+	fmt.Println("-----------------------")
+
+	sampString := "Hello World"
+	fmt.Println("sampString:		", sampString)
+	fmt.Println("Contains \"lo\":		", strings.Contains(sampString, "lo"))
+	fmt.Println("Index \"lo\":		", strings.Index(sampString, "lo"))
+	fmt.Println("Count \"l\":		", strings.Count(sampString, "l"))
+	fmt.Println("Replace \"l\", \"x\", 2:	", strings.Replace(sampString, "l", "x", 2))
+
+	csvString := "1,2,3,4,5,6"
+	fmt.Println("\ncsvString:	", csvString)
+	fmt.Println("split:		", strings.Split(csvString, ","))
+
+	listOfLetters := []string{"c", "a", "b"}
+	fmt.Println("\nlistOfLetters:	", listOfLetters)
+	sort.Strings(listOfLetters)
+	fmt.Println("sorted:		", listOfLetters)
+	joinedLetters := strings.Join(listOfLetters, ", ")
+	fmt.Println("joined:		", joinedLetters)
+
+	listOfNums := strings.Join([]string{"3", "2", "1"}, ", ")
+	fmt.Println("\n", listOfNums)
+
+	/* ------------------------------
+	FILE IO
+	--------------------------------- */
+	fmt.Println("-----------------------")
+	println("-       FILE IO       -")
+	fmt.Println("-----------------------")
+
+	// Write file
+	file, err := os.Create("sample.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	file.WriteString("This is some random text put within a new file.")
+	file.Close()
+
+	//Read File
+	stream, err := ioutil.ReadFile("sample.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	readString := string(stream)
+	fmt.Println(readString)
+
+	/* ------------------------------
+	CASTING
+	--------------------------------- */
+	fmt.Println("-----------------------")
+	println("-       CASTING       -")
+	fmt.Println("-----------------------")
+
+	randInt := 5
+	randFloat := 10.5
+	randString := "100"
+	randString2 := "250.5"
+
+	fmt.Println("randInt:	", randInt, "	to float64:	", float64(randInt))
+	fmt.Println("randFloat:	", randFloat, "	to int:		", int(randFloat))
+
+	newInt, _ := strconv.ParseInt(randString, 0, 64)
+	fmt.Println("randString:	", randString, "	to int:		", newInt)
+
+	newFloat, _ := strconv.ParseFloat(randString2, 64)
+	fmt.Println("randString2:	", randString2, "	to float64:	", newFloat)
+
+	/* ------------------------------
+	HTTP SERVER
+	--------------------------------- */
+	fmt.Println("-----------------------")
+	println("-     HTTP SERVER     -")
+	fmt.Println("-----------------------")
+
+	fmt.Println("Uncomment the code in this section to activate http server")
+	// // handler functions defined outside of main (below)
+	// http.HandleFunc("/", handler)
+	// http.HandleFunc("/earth", handler2)
+
+	// http.ListenAndServe(":8080", nil)
+
+	/* ------------------------------
+	GO ROUTINES
+	--------------------------------- */
+	fmt.Println("-----------------------")
+	println("-     GO ROUTINES     -")
+	fmt.Println("-----------------------")
+
+	for i := 0; i < 2; i++ {
+		go count(i)
+	}
+	time.Sleep(time.Millisecond * 6000)
+
+	/* ------------------------------
+	CHANNELS
+	--------------------------------- */
+	fmt.Println("-----------------------")
+	println("-    CHANNELS    -")
+	fmt.Println("-----------------------")
+
+	stringChan := make(chan string)
+
+	for i := 0; i < 3; i++ {
+		go makeDough(stringChan)
+		go addSauce(stringChan)
+		go addToppings(stringChan)
+
+		fmt.Println("--------------------")
+		time.Sleep(time.Millisecond * 2000)
+	}
+}
+
+func addThemUp(numbers []float64) float64 {
+	sum := 0.0
+
+	for _, val := range numbers {
+		sum += val
+	}
+
+	return sum
+}
+
+func next2Values(number int) (int, int) {
+	return number + 1, number + 2
+}
+
+func subtractThem(args ...int) int {
+	finalValue := 0
+
+	for _, value := range args {
+		finalValue -= value
+	}
+
+	return finalValue
+}
+
+// Used for recursion
+func factorial(num int) int {
+	if num == 1 {
+		return 1
+	}
+
+	return num * factorial(num-1)
+}
+
+// Used for defer
+func printOne() { fmt.Println(1) }
+func printTwo() { fmt.Println(2) }
+
+func safeDiv(num1, num2 int) int {
+	defer func() {
+		// fmt.Println(recover())
+		recover()
+	}()
+
+	solution := num1 / num2
+	return solution
+}
+
+func demPanic() {
+	defer func() {
+		fmt.Println(recover())
+	}()
+
+	panic("PANIC")
+}
+
+func changeXVal(x int) {
+	x = 2
+}
+
+func changeXValNow(x *int) {
+	*x = 2
+}
+
+// Rectangle : this is a rectangle struct
+type Rectangle struct {
+	leftX  float64
+	topY   float64
+	height float64
+	width  float64
+}
+
+func (rect *Rectangle) area() float64 {
+	return rect.width * rect.height
+}
+
+// Shape : this is an interface
+type Shape interface {
+	area() float64
+}
+
+// Square : this is a Square struct
+type Square struct {
+	height float64
+	width  float64
+}
+
+// Circle : this is a Circle struct
+type Circle struct {
+	radius float64
+}
+
+func (s Square) area() float64 {
+	return s.height * s.width
+}
+
+func (c Circle) area() float64 {
+	return math.Pi * math.Pow(c.radius, 2)
+}
+
+func getArea(shape Shape) float64 {
+	return shape.area()
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello World\n")
+}
+
+func handler2(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello Earth\n")
+}
+
+func count(id int) {
+	for i := 0; i < 6; i++ {
+		fmt.Println(id, ":", i)
+		time.Sleep(time.Millisecond * 1000)
+	}
+}
+
+var pizzaNum = 0
+var pizzaName = ""
+
+func makeDough(stringChan chan string) {
+	pizzaNum++
+	pizzaName = "Pizza #" + strconv.Itoa(pizzaNum)
+	fmt.Println("Make Dough and Send for Sauce")
+
+	stringChan <- pizzaName
+	time.Sleep(time.Millisecond * 100)
+}
+
+func addSauce(stringChan chan string) {
+	pizza := <-stringChan
+	fmt.Println("Add Sauce and Send", pizza, "for toppings")
+
+	stringChan <- pizzaName
+	time.Sleep(time.Millisecond * 100)
+}
+
+func addToppings(stringChan chan string) {
+	pizza := <-stringChan
+	fmt.Println("Add toppings to", pizza, "and ship")
+
+	time.Sleep(time.Millisecond * 100)
 }
