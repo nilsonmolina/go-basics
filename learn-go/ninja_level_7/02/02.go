@@ -26,7 +26,7 @@ type person struct {
 
 func changeMe(p *person) {
 	p.name = "Todd McLeod"
-	// (*p).first = "Todd" // also works
+	// (*p).name = "Nilson Molina" // also works
 }
 
 func main() {
