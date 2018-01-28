@@ -6,6 +6,10 @@ package main
 	- fmt Print
 	- strings
 	- strconv
+
+// SOLUTION
+1. in terminal, simply run the command:
+	godoc <command> // ex. godoc fmt
 ----------------------------------- */
 
 func main() {
