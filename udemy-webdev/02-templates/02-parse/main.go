@@ -13,20 +13,11 @@ import (
 // init values only needed for func initParsedGlob()
 var initTpl *template.Template
 
-// init values only needed for func initParsedGlob()
 func init() {
 	initTpl = template.Must(template.ParseGlob("templates/*.gohtml"))
 }
 
 func main() {
-	file := "tpl.gohtml"
-	files := []string{
-		"templates/one.gohtml",
-		"templates/two.gohtml",
-		"templates/vespa.gohtml",
-	}
-	glob := "templates/*.gohtml"
-
 	for {
 		menu()
 		input, err := readInput()
@@ -35,15 +26,15 @@ func main() {
 		}
 
 		if input == 1 {
-			writeToStdOut(file)
+			writeToStdOut()
 		} else if input == 2 {
-			writeToFile(file)
+			writeToFile()
 		} else if input == 3 {
-			parseFiles(files)
+			parseFiles()
 		} else if input == 4 {
-			parseGlob(glob, files)
+			parseGlob()
 		} else if input == 5 {
-			initParseGlob(files)
+			initParseGlob()
 		} else if input == 0 {
 			break
 		}
@@ -70,8 +61,8 @@ func readInput() (int, error) {
 	return strconv.Atoi(strings.Trim(rs, "\n"))
 }
 
-func writeToStdOut(file string) {
-	tpl, err := template.ParseFiles(file)
+func writeToStdOut() {
+	tpl, err := template.ParseFiles("tpl.gohtml")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -82,8 +73,8 @@ func writeToStdOut(file string) {
 	}
 }
 
-func writeToFile(file string) {
-	tpl, err := template.ParseFiles(file)
+func writeToFile() {
+	tpl, err := template.ParseFiles("tpl.gohtml")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -100,8 +91,8 @@ func writeToFile(file string) {
 	}
 }
 
-func parseFiles(files []string) {
-	tpl, err := template.ParseFiles(files[0])
+func parseFiles() {
+	tpl, err := template.ParseFiles("templates/one.gohtml")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -110,19 +101,19 @@ func parseFiles(files []string) {
 		log.Fatalln(err)
 	}
 
-	tpl, err = tpl.ParseFiles(files[1], files[2])
+	tpl, err = tpl.ParseFiles("templates/two.gohtml", "templates/vespa.gohtml")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = tpl.ExecuteTemplate(os.Stdout, strings.TrimPrefix(files[2], "templates/"), nil)
+	err = tpl.ExecuteTemplate(os.Stdout, "vespa.gohtml", nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = tpl.ExecuteTemplate(os.Stdout, strings.TrimPrefix(files[1], "templates/"), nil)
+	err = tpl.ExecuteTemplate(os.Stdout, "two.gohtml", nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = tpl.ExecuteTemplate(os.Stdout, strings.TrimPrefix(files[0], "templates/"), nil)
+	err = tpl.ExecuteTemplate(os.Stdout, "one.gohtml", nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -132,8 +123,8 @@ func parseFiles(files []string) {
 	}
 }
 
-func parseGlob(glob string, files []string) {
-	tpl, err := template.ParseGlob(glob)
+func parseGlob() {
+	tpl, err := template.ParseGlob("templates/*.gohtml")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -143,17 +134,17 @@ func parseGlob(glob string, files []string) {
 		log.Fatalln(err)
 	}
 
-	err = tpl.ExecuteTemplate(os.Stdout, strings.TrimPrefix(files[1], "templates/"), nil)
+	err = tpl.ExecuteTemplate(os.Stdout, "two.gohtml", nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = tpl.ExecuteTemplate(os.Stdout, strings.TrimPrefix(files[2], "templates/"), nil)
+	err = tpl.ExecuteTemplate(os.Stdout, "vespa.gohtml", nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = tpl.ExecuteTemplate(os.Stdout, strings.TrimPrefix(files[0], "templates/"), nil)
+	err = tpl.ExecuteTemplate(os.Stdout, "one.gohtml", nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -161,23 +152,23 @@ func parseGlob(glob string, files []string) {
 
 // If templates are changed after program runs, this will not show changes
 // until program restarts, since templates are already in memory
-func initParseGlob(files []string) {
+func initParseGlob() {
 	err := initTpl.Execute(os.Stdout, nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = initTpl.ExecuteTemplate(os.Stdout, strings.TrimPrefix(files[2], "templates/"), nil)
+	err = initTpl.ExecuteTemplate(os.Stdout, "vespa.gohtml", nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = initTpl.ExecuteTemplate(os.Stdout, strings.TrimPrefix(files[1], "templates/"), nil)
+	err = initTpl.ExecuteTemplate(os.Stdout, "two.gohtml", nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = initTpl.ExecuteTemplate(os.Stdout, strings.TrimPrefix(files[0], "templates/"), nil)
+	err = initTpl.ExecuteTemplate(os.Stdout, "one.gohtml", nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
