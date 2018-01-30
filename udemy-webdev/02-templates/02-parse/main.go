@@ -47,6 +47,7 @@ func main() {
 		} else if input == 0 {
 			break
 		}
+
 		fmt.Println()
 	}
 }
@@ -142,12 +143,12 @@ func parseGlob(glob string, files []string) {
 		log.Fatalln(err)
 	}
 
-	err = tpl.ExecuteTemplate(os.Stdout, strings.TrimPrefix(files[2], "templates/"), nil)
+	err = tpl.ExecuteTemplate(os.Stdout, strings.TrimPrefix(files[1], "templates/"), nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = tpl.ExecuteTemplate(os.Stdout, strings.TrimPrefix(files[1], "templates/"), nil)
+	err = tpl.ExecuteTemplate(os.Stdout, strings.TrimPrefix(files[2], "templates/"), nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -158,6 +159,8 @@ func parseGlob(glob string, files []string) {
 	}
 }
 
+// If templates are changed after program runs, this will not show changes
+// until program restarts, since templates are already in memory
 func initParseGlob(files []string) {
 	err := initTpl.Execute(os.Stdout, nil)
 	if err != nil {
