@@ -1,0 +1,38 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Enctype</title>
+</head>
+<body>
+    <a href="/">default</a> - 
+    <a href="/multipart">multipart</a> - 
+    <a href="/text">text</a>
+
+    <h1>Enctype - <small><em>Encode Type: {{.Enctype}}</em></small></h1>
+    <h3>{{.Description}}</h3>
+
+    <form method="POST" enctype="{{.Enctype}}">
+        <label for="firstName">First Name</label>
+        <input type="text" id="firstName" name="first">
+        <br>
+        <label for="lastName">Last Name</label>
+        <input type="text" id="lastName" name="last">
+        <br>
+        <label for="sub">Subscribed</label>
+        <input type="checkbox" id="sub" name="subscribe">
+        <br>
+        <input type="file" name="file-upload">
+        <br>
+        <input type="submit">
+        <br>
+    </form>
+
+    <br>
+
+    {{if .Body}}
+    <h1>BODY: {{.Body}}</h1>
+    {{end}}
+</body>
+</html>
