@@ -1,0 +1,2295 @@
+
+<!DOCTYPE html>
+<html lang="en-US" prefix="og: http://ogp.me/ns#">
+
+	<head>
+
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Making a RESTful JSON API in Go - The New Stack</title>
+		<link rel="profile" href="//gmpg.org/xfn/11">
+		<link rel="pingback" href="https://thenewstack.io/xmlrpc.php">
+		<link rel="icon" href="https://thenewstack.io/favicon.ico" type="image/x-icon" />
+		<link rel="shortcut icon" href="https://thenewstack.io/favicon.ico" type="image/x-icon" />
+		<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,700italic,600,600italic,400italic,300italic,300,800,800italic' rel='stylesheet' type='text/css'>
+		<link href="https://fonts.googleapis.com/css?family=Merriweather:300,300i,400,400i,700,700i" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Merriweather+Sans" rel="stylesheet">
+		<link rel='stylesheet' id='dashicons-css' href='https://thenewstack.io/wp-includes/css/dashicons.min.css?ver=4.8.2' type='text/css' media='all' />
+
+		<script>(function(d, s, id){
+				 var js, fjs = d.getElementsByTagName(s)[0];
+				 if (d.getElementById(id)) {return;}
+				 js = d.createElement(s); js.id = id;
+				 js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.6";
+				 fjs.parentNode.insertBefore(js, fjs);
+			   }(document, 'script', 'facebook-jssdk'));</script>
+<!-- This site is optimized with the Yoast SEO plugin v5.9.3 - https://yoast.com/wordpress/plugins/seo/ -->
+<link rel="canonical" href="https://thenewstack.io/make-a-restful-json-api-go/" />
+<link rel="publisher" href="https://plus.google.com/u/0/100040585732637649813"/>
+<meta property="og:locale" content="en_US" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Making a RESTful JSON API in Go - The New Stack" />
+<meta property="og:description" content="In this post, we will not only cover how to use Go to create a RESTful JSON API, but we will also talk about good RESTful design. If you have ever consumed an API in the past that doesn&#8217;t follow good design, then you end up writing bad code to consume a bad API. Hopefully, after this &hellip;" />
+<meta property="og:url" content="https://thenewstack.io/make-a-restful-json-api-go/" />
+<meta property="og:site_name" content="The New Stack" />
+<meta property="article:publisher" content="https://www.facebook.com/thenewstack" />
+<meta property="article:tag" content="APIs" />
+<meta property="article:tag" content="Development" />
+<meta property="article:tag" content="go" />
+<meta property="article:tag" content="Golang" />
+<meta property="article:tag" content="JSON" />
+<meta property="article:tag" content="restful api" />
+<meta property="article:section" content="Technology" />
+<meta property="article:published_time" content="2014-11-26T10:38:14-08:00" />
+<meta property="article:modified_time" content="2017-11-02T10:01:25-08:00" />
+<meta property="og:updated_time" content="2017-11-02T10:01:25-08:00" />
+<meta property="og:image" content="https://cdn.thenewstack.io/media/2014/11/goraster.png" />
+<meta property="og:image:secure_url" content="https://cdn.thenewstack.io/media/2014/11/goraster.png" />
+<meta property="og:image:width" content="1600" />
+<meta property="og:image:height" content="1000" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:description" content="In this post, we will not only cover how to use Go to create a RESTful JSON API, but we will also talk about good RESTful design. If you have ever consumed an API in the past that doesn&#8217;t follow good design, then you end up writing bad code to consume a bad API. Hopefully, after this [&hellip;]" />
+<meta name="twitter:title" content="Making a RESTful JSON API in Go - The New Stack" />
+<meta name="twitter:site" content="@thenewstack" />
+<meta name="twitter:image" content="https://cdn.thenewstack.io/media/2014/11/goraster.png" />
+<meta name="twitter:creator" content="@thenewstack" />
+<script type='application/ld+json'>{"@context":"http:\/\/schema.org","@type":"WebSite","@id":"#website","url":"https:\/\/thenewstack.io\/","name":"The New Stack","potentialAction":{"@type":"SearchAction","target":"https:\/\/thenewstack.io\/?s={search_term_string}","query-input":"required name=search_term_string"}}</script>
+<!-- / Yoast SEO plugin. -->
+
+<link rel='dns-prefetch' href='//ws.sharethis.com' />
+<link rel='dns-prefetch' href='//cdnjs.cloudflare.com' />
+<link rel='dns-prefetch' href='//cdn.thenewstack.io' />
+<link rel='dns-prefetch' href='//fonts.googleapis.com' />
+<link rel='dns-prefetch' href='//maxcdn.bootstrapcdn.com' />
+<link rel='dns-prefetch' href='//s.w.org' />
+<link rel="alternate" type="application/rss+xml" title="The New Stack &raquo; Feed" href="https://thenewstack.io/feed/" />
+<link rel="alternate" type="application/rss+xml" title="The New Stack &raquo; Comments Feed" href="https://thenewstack.io/comments/feed/" />
+		<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/2.4\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/2.4\/svg\/","svgExt":".svg","source":{"concatemoji":"https:\/\/thenewstack.io\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.9.3"}};
+			!function(a,b,c){function d(a,b){var c=String.fromCharCode;l.clearRect(0,0,k.width,k.height),l.fillText(c.apply(this,a),0,0);var d=k.toDataURL();l.clearRect(0,0,k.width,k.height),l.fillText(c.apply(this,b),0,0);var e=k.toDataURL();return d===e}function e(a){var b;if(!l||!l.fillText)return!1;switch(l.textBaseline="top",l.font="600 32px Arial",a){case"flag":return!(b=d([55356,56826,55356,56819],[55356,56826,8203,55356,56819]))&&(b=d([55356,57332,56128,56423,56128,56418,56128,56421,56128,56430,56128,56423,56128,56447],[55356,57332,8203,56128,56423,8203,56128,56418,8203,56128,56421,8203,56128,56430,8203,56128,56423,8203,56128,56447]),!b);case"emoji":return b=d([55357,56692,8205,9792,65039],[55357,56692,8203,9792,65039]),!b}return!1}function f(a){var c=b.createElement("script");c.src=a,c.defer=c.type="text/javascript",b.getElementsByTagName("head")[0].appendChild(c)}var g,h,i,j,k=b.createElement("canvas"),l=k.getContext&&k.getContext("2d");for(j=Array("flag","emoji"),c.supports={everything:!0,everythingExceptFlag:!0},i=0;i<j.length;i++)c.supports[j[i]]=e(j[i]),c.supports.everything=c.supports.everything&&c.supports[j[i]],"flag"!==j[i]&&(c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&c.supports[j[i]]);c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&!c.supports.flag,c.DOMReady=!1,c.readyCallback=function(){c.DOMReady=!0},c.supports.everything||(h=function(){c.readyCallback()},b.addEventListener?(b.addEventListener("DOMContentLoaded",h,!1),a.addEventListener("load",h,!1)):(a.attachEvent("onload",h),b.attachEvent("onreadystatechange",function(){"complete"===b.readyState&&c.readyCallback()})),g=c.source||{},g.concatemoji?f(g.concatemoji):g.wpemoji&&g.twemoji&&(f(g.twemoji),f(g.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script>
+		<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<link rel='stylesheet' id='stripe-checkout-button-css'  href='https://checkout.stripe.com/v3/checkout/button.css?ver=2.3.7' type='text/css' media='all' />
+<link rel='stylesheet' id='pikaday-css'  href='https://thenewstack.io/wp-content/plugins/stripe-checkout-pro/assets/css/vendor/pikaday.min.css?ver=2.3.7' type='text/css' media='all' />
+<link rel='stylesheet' id='stripe-checkout-pro-public-css'  href='https://thenewstack.io/wp-content/plugins/stripe-checkout-pro/assets/css/public-pro.min.css?ver=2.3.7' type='text/css' media='all' />
+<link rel='stylesheet' id='cforms2-css'  href='https://thenewstack.io/wp-content/plugins/cforms2/styling/cforms.css?ver=14.14' type='text/css' media='all' />
+<link rel='stylesheet' id='simple-share-buttons-adder-indie-css'  href='//fonts.googleapis.com/css?family=Indie+Flower&#038;ver=4.9.3' type='text/css' media='all' />
+<link rel='stylesheet' id='wprssmi_template_styles-css'  href='https://thenewstack.io/wp-content/plugins/wp-rss-multi-importer/templates/templates.css?ver=4.9.3' type='text/css' media='all' />
+<link rel='stylesheet' id='thenewstack-style-css'  href='https://thenewstack.io/wp-content/themes/thenewstack/style.css?ver=1513332099' type='text/css' media='all' />
+<link rel='stylesheet' id='responsive-tables-style-css'  href='https://thenewstack.io/wp-content/themes/thenewstack/inc/responsive-tables/responsive-tables.css?ver=4.9.3' type='text/css' media='all' />
+<link rel='stylesheet' id='Fontawesome-css'  href='//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css?ver=4.9.3' type='text/css' media='all' />
+<link rel='stylesheet' id='algolia-autocomplete-css'  href='https://thenewstack.io/wp-content/plugins/search-by-algolia-instant-relevant-results/includes/../css/algolia-autocomplete.css?ver=2.8.1' type='text/css' media='screen' />
+<link rel='stylesheet' id='cyclone-template-style-dark-css'  href='https://thenewstack.io/wp-content/plugins/cyclone-slider-2/templates/dark/style.css?ver=2.10.0' type='text/css' media='all' />
+<link rel='stylesheet' id='cyclone-template-style-default-css'  href='https://thenewstack.io/wp-content/plugins/cyclone-slider-2/templates/default/style.css?ver=2.10.0' type='text/css' media='all' />
+<link rel='stylesheet' id='cyclone-template-style-ebook-sponsors-css'  href='https://thenewstack.io/wp-content/plugins/cyclone-slider-2/templates/ebook-sponsors/style.css?ver=2.10.0' type='text/css' media='all' />
+<link rel='stylesheet' id='cyclone-template-style-standard-css'  href='https://thenewstack.io/wp-content/plugins/cyclone-slider-2/templates/standard/style.css?ver=2.10.0' type='text/css' media='all' />
+<link rel='stylesheet' id='cyclone-template-style-thumbnails-css'  href='https://thenewstack.io/wp-content/plugins/cyclone-slider-2/templates/thumbnails/style.css?ver=2.10.0' type='text/css' media='all' />
+<script type='text/javascript' src='https://thenewstack.io/wp-includes/js/jquery/jquery.js?ver=1.12.4'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-includes/js/jquery/jquery-migrate.min.js?ver=1.4.1'></script>
+<script type='text/javascript'>
+/* <![CDATA[ */
+var cforms2_ajax = {"url":"https:\/\/thenewstack.io\/wp-admin\/admin-ajax.php","nonces":{"submitcform":"58520e8f7c"}};
+/* ]]> */
+</script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/cforms2/js/cforms.js?ver=14.14'></script>
+<script id='st_insights_js' type='text/javascript' src='https://ws.sharethis.com/button/st_insights.js?publisher=4d48b7c5-0ae3-43d4-bfbe-3ff8c17a8ae6&#038;product=simpleshare'></script>
+<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/validator/4.0.5/validator.min.js?ver=4.9.3'></script>
+<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/jquery.transit/0.9.12/jquery.transit.min.js?ver=4.9.3'></script>
+<script type='text/javascript' src='//cdn.thenewstack.io/static/js/jquery.mobile-events.min.js?ver=4.9.3'></script>
+<script type='text/javascript' src='//cdn.thenewstack.io/static/js/date-format.js?ver=4.9.3'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-includes/js/underscore.min.js?ver=1.8.3'></script>
+<script type='text/javascript'>
+/* <![CDATA[ */
+var _wpUtilSettings = {"ajax":{"url":"\/wp-admin\/admin-ajax.php"}};
+/* ]]> */
+</script>
+<script type='text/javascript' src='https://thenewstack.io/wp-includes/js/wp-util.min.js?ver=4.9.3'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/search-by-algolia-instant-relevant-results/includes/../js/algoliasearch/algoliasearch.jquery.min.js?ver=2.8.1'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/search-by-algolia-instant-relevant-results/includes/../js/autocomplete.js/autocomplete.min.js?ver=2.8.1'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/search-by-algolia-instant-relevant-results/includes/../js/autocomplete-noconflict.js?ver=2.8.1'></script>
+<link rel='https://api.w.org/' href='https://thenewstack.io/wp-json/' />
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://thenewstack.io/xmlrpc.php?rsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="https://thenewstack.io/wp-includes/wlwmanifest.xml" /> 
+<meta name="generator" content="WordPress 4.9.3" />
+<link rel='shortlink' href='https://thenewstack.io/?p=146592' />
+<link rel="alternate" type="application/json+oembed" href="https://thenewstack.io/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fthenewstack.io%2Fmake-a-restful-json-api-go%2F" />
+<link rel="alternate" type="text/xml+oembed" href="https://thenewstack.io/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fthenewstack.io%2Fmake-a-restful-json-api-go%2F&#038;format=xml" />
+<script type="text/javascript">
+	window._se_plugin_version = '8.1.9';
+</script>
+<script type="text/javascript">var algolia = {"debug":false,"application_id":"TR8Q1WH2YG","search_api_key":"4eb191af6de81c46c3e14fde0d594bf3","powered_by_enabled":true,"query":"","autocomplete":{"sources":[{"index_id":"posts_post","index_name":"wp_posts_post","label":"Posts","admin_name":"Posts","position":10,"max_suggestions":5,"tmpl_suggestion":"autocomplete-post-suggestion","enabled":true},{"index_id":"terms_post_tag","index_name":"wp_terms_post_tag","label":"Tags","admin_name":"Tags","position":20,"max_suggestions":3,"tmpl_suggestion":"autocomplete-term-suggestion","enabled":true},{"index_id":"users","index_name":"wp_users","label":"Users","admin_name":"Users","position":30,"max_suggestions":3,"tmpl_suggestion":"autocomplete-user-suggestion","enabled":true}],"input_selector":"input[name='s']:not('.no-autocomplete')"},"indices":{"posts_post":{"name":"wp_posts_post","id":"posts_post","enabled":true,"replicas":[]},"terms_post_tag":{"name":"wp_terms_post_tag","id":"terms_post_tag","enabled":true,"replicas":[]},"users":{"name":"wp_users","id":"users","enabled":true,"replicas":[]}}};</script><meta name="twitter:widgets:link-color" content="#000000"><meta name="twitter:widgets:border-color" content="#000000"><meta name="twitter:partner" content="tfwp"><style type="text/css" id="syntaxhighlighteranchor"></style>
+
+<meta name="twitter:card" content="summary"><meta name="twitter:title" content="Making a RESTful JSON API in Go"><meta name="twitter:site" content="@thenewstack"><meta name="twitter:description" content="In this post, we will not only cover how to use Go to create a RESTful JSON API, but we will also talk about good RESTful design. If you have ever consumed an API in the past that doesn&#039;t follow good design, then you end up writing bad code to consume a bad API. Hopefully, after this&hellip;"><meta name="twitter:image" content="https://cdn.thenewstack.io/media/2014/11/goraster.png">
+<script type="text/html" id="tmpl-autocomplete-header">
+  <div class="autocomplete-header">
+    <div class="autocomplete-header-title">{{{ data.label }}}</div>
+    <div class="clear"></div>
+  </div>
+</script>
+
+<script type="text/html" id="tmpl-autocomplete-post-suggestion">
+  <a class="suggestion-link" href="{{ data.permalink }}" title="{{ data.post_title }}">
+    <# if ( data.images.thumbnail ) { #>
+      <img class="suggestion-post-thumbnail" src="{{ data.images.thumbnail.url }}" alt="{{ data.post_title }}">
+      <# } #>
+        <div class="suggestion-post-attributes">
+          <span class="suggestion-post-title">{{{ data._highlightResult.post_title.value }}}</span>
+          <# if ( data._snippetResult['content'] ) { #>
+            <span class="suggestion-post-content">{{{ data._snippetResult['content'].value }}}</span>
+            <# } #>
+        </div>
+  </a>
+</script>
+
+<script type="text/html" id="tmpl-autocomplete-term-suggestion">
+  <a class="suggestion-link" href="{{ data.permalink }}" title="{{ data.name }}">
+    <svg viewBox="0 0 21 21" width="21" height="21">
+      <svg width="21" height="21" viewBox="0 0 21 21">
+        <path
+            d="M4.662 8.72l-1.23 1.23c-.682.682-.68 1.792.004 2.477l5.135 5.135c.7.693 1.8.688 2.48.005l1.23-1.23 5.35-5.346c.31-.31.54-.92.51-1.36l-.32-4.29c-.09-1.09-1.05-2.06-2.15-2.14l-4.3-.33c-.43-.03-1.05.2-1.36.51l-.79.8-2.27 2.28-2.28 2.27zm9.826-.98c.69 0 1.25-.56 1.25-1.25s-.56-1.25-1.25-1.25-1.25.56-1.25 1.25.56 1.25 1.25 1.25z"
+            fill-rule="evenodd"></path>
+      </svg>
+    </svg>
+    <span class="suggestion-post-title">{{{ data._highlightResult.name.value }}}</span>
+  </a>
+</script>
+
+<script type="text/html" id="tmpl-autocomplete-user-suggestion">
+  <a class="suggestion-link user-suggestion-link" href="{{ data.posts_url }}" title="{{ data.display_name }}">
+    <# if ( data.avatar_url ) { #>
+      <img class="suggestion-user-thumbnail" src="{{ data.avatar_url }}" alt="{{ data.display_name }}">
+      <# } #>
+
+        <span class="suggestion-post-title">{{{ data._highlightResult.display_name.value }}}</span>
+  </a>
+</script>
+
+<script type="text/html" id="tmpl-autocomplete-footer">
+  <div class="autocomplete-footer">
+    <div class="autocomplete-footer-branding">
+      <a href="#" class="algolia-powered-by-link" title="Algolia">
+        <svg width="130" viewBox="0 0 130 18" xmlns="http://www.w3.org/2000/svg">
+          <title>Search by Algolia</title>
+          <defs>
+            <linearGradient x1="-36.868%" y1="134.936%" x2="129.432%" y2="-27.7%" id="a">
+              <stop stop-color="#00AEFF" offset="0%"/>
+              <stop stop-color="#3369E7" offset="100%"/>
+            </linearGradient>
+          </defs>
+          <g fill="none" fill-rule="evenodd">
+            <path
+                d="M59.399.022h13.299a2.372 2.372 0 0 1 2.377 2.364V15.62a2.372 2.372 0 0 1-2.377 2.364H59.399a2.372 2.372 0 0 1-2.377-2.364V2.381A2.368 2.368 0 0 1 59.399.022z"
+                fill="url(#a)"/>
+            <path
+                d="M66.257 4.56c-2.815 0-5.1 2.272-5.1 5.078 0 2.806 2.284 5.072 5.1 5.072 2.815 0 5.1-2.272 5.1-5.078 0-2.806-2.279-5.072-5.1-5.072zm0 8.652c-1.983 0-3.593-1.602-3.593-3.574 0-1.972 1.61-3.574 3.593-3.574 1.983 0 3.593 1.602 3.593 3.574a3.582 3.582 0 0 1-3.593 3.574zm0-6.418v2.664c0 .076.082.131.153.093l2.377-1.226c.055-.027.071-.093.044-.147a2.96 2.96 0 0 0-2.465-1.487c-.055 0-.11.044-.11.104l.001-.001zm-3.33-1.956l-.312-.311a.783.783 0 0 0-1.106 0l-.372.37a.773.773 0 0 0 0 1.101l.307.305c.049.049.121.038.164-.011.181-.245.378-.479.597-.697.225-.223.455-.42.707-.599.055-.033.06-.109.016-.158h-.001zm5.001-.806v-.616a.781.781 0 0 0-.783-.779h-1.824a.78.78 0 0 0-.783.779v.632c0 .071.066.12.137.104a5.736 5.736 0 0 1 1.588-.223c.52 0 1.035.071 1.534.207a.106.106 0 0 0 .131-.104z"
+                fill="#FFF"/>
+            <path
+                d="M102.162 13.762c0 1.455-.372 2.517-1.123 3.193-.75.676-1.895 1.013-3.44 1.013-.564 0-1.736-.109-2.673-.316l.345-1.689c.783.163 1.819.207 2.361.207.86 0 1.473-.174 1.84-.523.367-.349.548-.866.548-1.553v-.349a6.374 6.374 0 0 1-.838.316 4.151 4.151 0 0 1-1.194.158 4.515 4.515 0 0 1-1.616-.278 3.385 3.385 0 0 1-1.254-.817 3.744 3.744 0 0 1-.811-1.351c-.192-.539-.29-1.504-.29-2.212 0-.665.104-1.498.307-2.054a3.925 3.925 0 0 1 .904-1.433 4.124 4.124 0 0 1 1.441-.926 5.31 5.31 0 0 1 1.945-.365c.696 0 1.337.087 1.961.191a15.86 15.86 0 0 1 1.588.332v8.456h-.001zm-5.954-4.206c0 .893.197 1.885.592 2.299.394.414.904.621 1.528.621.34 0 .663-.049.964-.142a2.75 2.75 0 0 0 .734-.332v-5.29a8.531 8.531 0 0 0-1.413-.18c-.778-.022-1.369.294-1.786.801-.411.507-.619 1.395-.619 2.223zm16.12 0c0 .719-.104 1.264-.318 1.858a4.389 4.389 0 0 1-.904 1.52c-.389.42-.854.746-1.402.975-.548.229-1.391.36-1.813.36-.422-.005-1.26-.125-1.802-.36a4.088 4.088 0 0 1-1.397-.975 4.486 4.486 0 0 1-.909-1.52 5.037 5.037 0 0 1-.329-1.858c0-.719.099-1.411.318-1.999.219-.588.526-1.09.92-1.509.394-.42.865-.741 1.402-.97a4.547 4.547 0 0 1 1.786-.338 4.69 4.69 0 0 1 1.791.338c.548.229 1.019.55 1.402.97.389.42.69.921.909 1.509.23.588.345 1.28.345 1.999h.001zm-2.191.005c0-.921-.203-1.689-.597-2.223-.394-.539-.948-.806-1.654-.806-.707 0-1.26.267-1.654.806-.394.539-.586 1.302-.586 2.223 0 .932.197 1.558.592 2.098.394.545.948.812 1.654.812.707 0 1.26-.272 1.654-.812.394-.545.592-1.166.592-2.098h-.001zm6.962 4.707c-3.511.016-3.511-2.822-3.511-3.274L113.583.926l2.142-.338v10.003c0 .256 0 1.88 1.375 1.885v1.792h-.001zm3.774 0h-2.153V5.072l2.153-.338v9.534zm-1.079-10.542c.718 0 1.304-.578 1.304-1.291 0-.714-.581-1.291-1.304-1.291-.723 0-1.304.578-1.304 1.291 0 .714.586 1.291 1.304 1.291zm6.431 1.013c.707 0 1.304.087 1.786.262.482.174.871.42 1.156.73.285.311.488.735.608 1.182.126.447.186.937.186 1.476v5.481a25.24 25.24 0 0 1-1.495.251c-.668.098-1.419.147-2.251.147a6.829 6.829 0 0 1-1.517-.158 3.213 3.213 0 0 1-1.178-.507 2.455 2.455 0 0 1-.761-.904c-.181-.37-.274-.893-.274-1.438 0-.523.104-.855.307-1.215.208-.36.487-.654.838-.883a3.609 3.609 0 0 1 1.227-.49 7.073 7.073 0 0 1 2.202-.103c.263.027.537.076.833.147v-.349c0-.245-.027-.479-.088-.697a1.486 1.486 0 0 0-.307-.583c-.148-.169-.34-.3-.581-.392a2.536 2.536 0 0 0-.915-.163c-.493 0-.942.06-1.353.131-.411.071-.75.153-1.008.245l-.257-1.749c.268-.093.668-.185 1.183-.278a9.335 9.335 0 0 1 1.66-.142l-.001-.001zm.181 7.731c.657 0 1.145-.038 1.484-.104v-2.168a5.097 5.097 0 0 0-1.978-.104c-.241.033-.46.098-.652.191a1.167 1.167 0 0 0-.466.392c-.121.169-.175.267-.175.523 0 .501.175.79.493.981.323.196.75.289 1.293.289h.001zM84.109 4.794c.707 0 1.304.087 1.786.262.482.174.871.42 1.156.73.29.316.487.735.608 1.182.126.447.186.937.186 1.476v5.481a25.24 25.24 0 0 1-1.495.251c-.668.098-1.419.147-2.251.147a6.829 6.829 0 0 1-1.517-.158 3.213 3.213 0 0 1-1.178-.507 2.455 2.455 0 0 1-.761-.904c-.181-.37-.274-.893-.274-1.438 0-.523.104-.855.307-1.215.208-.36.487-.654.838-.883a3.609 3.609 0 0 1 1.227-.49 7.073 7.073 0 0 1 2.202-.103c.257.027.537.076.833.147v-.349c0-.245-.027-.479-.088-.697a1.486 1.486 0 0 0-.307-.583c-.148-.169-.34-.3-.581-.392a2.536 2.536 0 0 0-.915-.163c-.493 0-.942.06-1.353.131-.411.071-.75.153-1.008.245l-.257-1.749c.268-.093.668-.185 1.183-.278a8.89 8.89 0 0 1 1.66-.142l-.001-.001zm.186 7.736c.657 0 1.145-.038 1.484-.104v-2.168a5.097 5.097 0 0 0-1.978-.104c-.241.033-.46.098-.652.191a1.167 1.167 0 0 0-.466.392c-.121.169-.175.267-.175.523 0 .501.175.79.493.981.318.191.75.289 1.293.289h.001zm8.682 1.738c-3.511.016-3.511-2.822-3.511-3.274L89.461.926l2.142-.338v10.003c0 .256 0 1.88 1.375 1.885v1.792h-.001z"
+                fill="#182359"/>
+            <path
+                d="M5.027 11.025c0 .698-.252 1.246-.757 1.644-.505.397-1.201.596-2.089.596-.888 0-1.615-.138-2.181-.414v-1.214c.358.168.739.301 1.141.397.403.097.778.145 1.125.145.508 0 .884-.097 1.125-.29a.945.945 0 0 0 .363-.779.978.978 0 0 0-.333-.747c-.222-.204-.68-.446-1.375-.725-.716-.29-1.221-.621-1.515-.994-.294-.372-.44-.82-.44-1.343 0-.655.233-1.171.698-1.547.466-.376 1.09-.564 1.875-.564.752 0 1.5.165 2.245.494l-.408 1.047c-.698-.294-1.321-.44-1.869-.44-.415 0-.73.09-.945.271a.89.89 0 0 0-.322.717c0 .204.043.379.129.524.086.145.227.282.424.411.197.129.551.299 1.063.51.577.24.999.464 1.268.671.269.208.466.442.591.704.125.261.188.569.188.924l-.001.002zm3.98 2.24c-.924 0-1.646-.269-2.167-.808-.521-.539-.782-1.281-.782-2.226 0-.97.242-1.733.725-2.288.483-.555 1.148-.833 1.993-.833.784 0 1.404.238 1.858.714.455.476.682 1.132.682 1.966v.682H7.357c.018.577.174 1.02.467 1.329.294.31.707.465 1.241.465.351 0 .678-.033.98-.099a5.1 5.1 0 0 0 .975-.33v1.026a3.865 3.865 0 0 1-.935.312 5.723 5.723 0 0 1-1.08.091l.002-.001zm-.231-5.199c-.401 0-.722.127-.964.381s-.386.625-.432 1.112h2.696c-.007-.491-.125-.862-.354-1.115-.229-.252-.544-.379-.945-.379l-.001.001zm7.692 5.092l-.252-.827h-.043c-.286.362-.575.608-.865.739-.29.131-.662.196-1.117.196-.584 0-1.039-.158-1.367-.473-.328-.315-.491-.761-.491-1.337 0-.612.227-1.074.682-1.386.455-.312 1.148-.482 2.079-.51l1.026-.032v-.317c0-.38-.089-.663-.266-.851-.177-.188-.452-.282-.824-.282-.304 0-.596.045-.876.134a6.68 6.68 0 0 0-.806.317l-.408-.902a4.414 4.414 0 0 1 1.058-.384 4.856 4.856 0 0 1 1.085-.132c.756 0 1.326.165 1.711.494.385.329.577.847.577 1.552v4.002h-.902l-.001-.001zm-1.88-.859c.458 0 .826-.128 1.104-.384.278-.256.416-.615.416-1.077v-.516l-.763.032c-.594.021-1.027.121-1.297.298s-.406.448-.406.814c0 .265.079.47.236.615.158.145.394.218.709.218h.001zm7.557-5.189c.254 0 .464.018.628.054l-.124 1.176a2.383 2.383 0 0 0-.559-.064c-.505 0-.914.165-1.227.494-.313.329-.47.757-.47 1.284v3.105h-1.262V7.218h.988l.167 1.047h.064c.197-.354.454-.636.771-.843a1.83 1.83 0 0 1 1.023-.312h.001zm4.125 6.155c-.899 0-1.582-.262-2.049-.787-.467-.525-.701-1.277-.701-2.259 0-.999.244-1.767.733-2.304.489-.537 1.195-.806 2.119-.806.627 0 1.191.116 1.692.349l-.381 1.015c-.534-.208-.974-.312-1.321-.312-1.028 0-1.542.682-1.542 2.046 0 .666.128 1.166.384 1.501.256.335.631.502 1.125.502a3.23 3.23 0 0 0 1.595-.419v1.101a2.53 2.53 0 0 1-.722.285 4.356 4.356 0 0 1-.932.086v.002zm8.277-.107h-1.268V9.506c0-.458-.092-.8-.277-1.026-.184-.226-.477-.338-.878-.338-.53 0-.919.158-1.168.475-.249.317-.373.848-.373 1.593v2.949h-1.262V4.801h1.262v2.122c0 .34-.021.704-.064 1.09h.081a1.76 1.76 0 0 1 .717-.666c.306-.158.663-.236 1.072-.236 1.439 0 2.159.725 2.159 2.175v3.873l-.001-.001zm7.649-6.048c.741 0 1.319.269 1.732.806.414.537.62 1.291.62 2.261 0 .974-.209 1.732-.628 2.275-.419.542-1.001.814-1.746.814-.752 0-1.336-.27-1.751-.811h-.086l-.231.704h-.945V4.801h1.262v1.987l-.021.655-.032.553h.054c.401-.591.992-.886 1.772-.886zm-.328 1.031c-.508 0-.875.149-1.098.448-.224.299-.339.799-.346 1.501v.086c0 .723.115 1.247.344 1.571.229.324.603.486 1.123.486.448 0 .787-.177 1.018-.532.231-.354.346-.867.346-1.536 0-1.35-.462-2.025-1.386-2.025l-.001.001zm3.244-.924h1.375l1.209 3.368c.183.48.304.931.365 1.354h.043c.032-.197.091-.436.177-.717.086-.281.541-1.616 1.364-4.004h1.364l-2.541 6.73c-.462 1.235-1.232 1.853-2.31 1.853-.279 0-.551-.03-.816-.091v-.999c.19.043.406.064.65.064.609 0 1.037-.353 1.284-1.058l.22-.559-2.385-5.941h.001z"
+                fill="#1D3657"/>
+          </g>
+        </svg>
+      </a>
+    </div>
+  </div>
+</script>
+
+<script type="text/html" id="tmpl-autocomplete-empty">
+  <div class="autocomplete-empty">
+      No results matched your query     <span class="empty-query">"{{ data.query }}"</span>
+  </div>
+</script>
+
+<script type="text/javascript">
+  jQuery(function () {
+    /* init Algolia client */
+    var client = algoliasearch(algolia.application_id, algolia.search_api_key);
+
+    /* setup default sources */
+    var sources = [];
+    jQuery.each(algolia.autocomplete.sources, function (i, config) {
+      var suggestion_template = wp.template(config['tmpl_suggestion']);
+      sources.push({
+        source: algoliaAutocomplete.sources.hits(client.initIndex(config['index_name']), {
+          hitsPerPage: config['max_suggestions'],
+          attributesToSnippet: [
+            'content:10'
+          ],
+          highlightPreTag: '__ais-highlight__',
+          highlightPostTag: '__/ais-highlight__'
+        }),
+        templates: {
+          header: function () {
+            return wp.template('autocomplete-header')({
+              label: _.escape(config['label'])
+            });
+          },
+          suggestion: function (hit) {
+            for (var key in hit._highlightResult) {
+              /* We do not deal with arrays. */
+              if (typeof hit._highlightResult[key].value !== 'string') {
+                continue;
+              }
+              hit._highlightResult[key].value = _.escape(hit._highlightResult[key].value);
+              hit._highlightResult[key].value = hit._highlightResult[key].value.replace(/__ais-highlight__/g, '<em>').replace(/__\/ais-highlight__/g, '</em>');
+            }
+
+            for (var key in hit._snippetResult) {
+              /* We do not deal with arrays. */
+              if (typeof hit._snippetResult[key].value !== 'string') {
+                continue;
+              }
+
+              hit._snippetResult[key].value = _.escape(hit._snippetResult[key].value);
+              hit._snippetResult[key].value = hit._snippetResult[key].value.replace(/__ais-highlight__/g, '<em>').replace(/__\/ais-highlight__/g, '</em>');
+            }
+
+            return suggestion_template(hit);
+          }
+        }
+      });
+
+    });
+
+    /* Setup dropdown menus */
+    jQuery(algolia.autocomplete.input_selector).each(function (i) {
+      var $searchInput = jQuery(this);
+
+      var config = {
+        debug: algolia.debug,
+        hint: false,
+        openOnFocus: true,
+        appendTo: 'body',
+        templates: {
+          empty: wp.template('autocomplete-empty')
+        }
+      };
+
+      if (algolia.powered_by_enabled) {
+        config.templates.footer = wp.template('autocomplete-footer');
+      }
+
+      /* Instantiate autocomplete.js */
+      var autocomplete = algoliaAutocomplete($searchInput[0], config, sources)
+      .on('autocomplete:selected', function (e, suggestion) {
+        /* Redirect the user when we detect a suggestion selection. */
+        window.location.href = suggestion.permalink;
+      });
+
+      /* Force the dropdown to be re-drawn on scroll to handle fixed containers. */
+      jQuery(window).scroll(function() {
+        if(autocomplete.autocomplete.getWrapper().style.display === "block") {
+          autocomplete.autocomplete.close();
+          autocomplete.autocomplete.open();
+        }
+      });
+    });
+
+    jQuery(document).on("click", ".algolia-powered-by-link", function (e) {
+      e.preventDefault();
+      window.location = "https://www.algolia.com/?utm_source=WordPress&utm_medium=extension&utm_content=" + window.location.hostname + "&utm_campaign=poweredby";
+    });
+  });
+</script>
+
+		<script type="text/javascript">
+
+			/// GA Install
+			var analyticsFileTypes = [''];
+		    var analyticsSnippet = 'disabled';
+		    var analyticsEventTracking = 'enabled';
+
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+			var host = window.location.hostname;
+
+			if (host === 'dev.thenewstack.io') {
+				ga('create', 'UA-20797087-4', 'auto'); /// Dev
+			}else{
+				ga('create', 'UA-50424056-1', 'auto'); /// Live
+			}
+
+						ga('set','dimension1','Cory Lanou');
+			
+			
+			ga('send','pageview');
+
+		</script>
+
+		<script type="text/javascript">
+			/// Heap Install
+			window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};
+			var n=t.forceSSL||"https:"===document.location.protocol,a=document.createElement("script");
+			a.type="text/javascript",a.async=!0,a.src=(n?"https:":"http:")+"//cdn.heapanalytics.com/js/heap-"+e+".js";
+			var o=document.getElementsByTagName("script")[0];o.parentNode.insertBefore(a,o);
+			for(var r=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},
+			p=["clearEventProperties","identify","setEventProperties","track","unsetEventProperty"],
+			c=0;c<p.length;c++)heap[p[c]]=r(p[c])};
+
+			heap.load("609441517");
+
+		</script>
+
+		<!-- Facebook Pixel Code -->
+		<script>
+			!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+			n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+			n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+			t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+			document,'script','https://connect.facebook.net/en_US/fbevents.js');
+			fbq('init', '1824226617806384');
+			fbq('track', "PageView");</script>
+			<noscript><img height="1" width="1" style="display:none"
+			src="https://www.facebook.com/tr?id=1824226617806384&ev=PageView&noscript=1"
+		/></noscript>
+		<!-- End Facebook Pixel Code -->
+
+	</head>
+
+	<body class="post-template-default single single-post postid-146592 single-format-standard group-blog">
+
+		<div id="navsearchform" class="search-pane search-pane-2017">
+			
+<script src="https://cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js"></script>
+
+<div class="search-2017 search-input-block">
+	<div class="search-2017-content">
+
+		<H2 class="search-instructions">SEARCH (ENTER TO SEE ALL RESULTS)</H2>
+
+		<div class="menu-close"></div>
+
+		<div class="search-input-wrap">
+
+			<img class="search-cancel" src="https://cdn.thenewstack.io/static/img/search-cancel-icon.png">
+			<input class="search-input" type="text" placeholder="Keyword, author, tag, etc." autocomplete="off" autocorrect="off" spellcheck="false">
+
+			<div class="search-preview">
+
+				<H2 class="search-preview-header search-preview-stories-header" data-dataset="wp_posts_post">
+					STORIES <i class="fa fa-arrow-right"></i>
+				</H2>
+				<div class="search-preview-stories"></div>
+
+				<H2 class="search-preview-header search-preview-tags-header" data-dataset="wp_terms_post_tag">
+					TAGS <i class="fa fa-arrow-right"></i>
+				</H2>
+				<div class="search-preview-tags"></div>
+
+				<H2 class="search-preview-header search-preview-authors-header" data-dataset="wp_users">
+					AUTHORS <i class="fa fa-arrow-right"></i>
+				</H2>
+				<div class="search-preview-authors"></div>
+
+			</div>
+
+		</div>
+
+	</div>
+</div>
+
+
+
+<div class="search-filter-nav">
+	<a href="#" class="search-filter-option search-filter-option-stories search-filter-option-active" data-dataset="wp_posts_post">STORIES</a>
+	<a href="#" class="search-filter-option search-filter-option-tags" data-dataset="wp_terms_post_tag">TAGS</a>
+	<a href="#" class="search-filter-option search-filter-option-authors" data-dataset="wp_users">AUTHORS</a>
+</div>
+
+
+
+<div class="search-2017 search-popular">
+	<div class="search-2017-content padding-top-0">
+
+		<div class="search-default">
+			<H2>POPULAR TOPICS</H2>
+			<div class="search-default-list">
+			<a href="/tag/docker">docker</a><br><a href="/tag/kubernetes">Kubernetes</a><br><a href="/tag/containers">containers</a><br><a href="/tag/the-new-stack-makers">the new stack makers</a><br><a href="/tag/devops">devops</a><br><a href="/tag/development">Development</a><br><a href="/tag/open-source">open source</a><br><a href="/tag/container-ecosystem">container ecosystem</a><br><a href="/tag/microservices">microservices</a><br><a href="/tag/security">Security</a><br>			</div>
+		</div>
+
+	</div>
+</div>
+
+
+
+<div class="search-2017 search-2017-light">
+	<div class="search-2017-content">
+
+		<div class="search-results">
+			<div class="search-results-list clearfix"></div>
+		</div>
+
+	</div>
+</div>
+
+
+
+<script id="search-result-story-card" type="x-template">
+	<div class="normalstory-box" style="height: 310px;">
+
+		<div class="commentcloud">
+			<h5 class="links">
+				<a href="***permalink***/#disqus_thread">+</a>
+			</h5>
+		</div>
+
+		<a href="***permalink***" class="athumbnail">
+			<div class="normalstory-overlay" style="display: none;">
+				<img src="https://cdn.thenewstack.io/dev/media/2016/01/Podcasts-Overlay-Context.svg">
+			</div>
+			<img width="290" height="120" src="***thumbnail***" class="attachment-normal size-normal wp-post-image wp-stateless-item" alt="" data-image-size="normal">
+		</a>
+
+		<header class="title-row" style="height: 300px;">
+
+			<h4>
+				***cats***
+			</h4>
+
+			<h2 class="small">
+				<a href="***permalink***">***title***</a>
+			</h2>
+
+			<h4 class="timestamp">
+				***date***, by
+				<span class="links">
+					***bylines***
+				</span>
+			</h4>
+
+		</header>
+
+	</div>
+</script>
+
+<script type="text/javascript">
+
+	var $ = jQuery;
+
+	/// dev.thenewstack.io
+	//var client = algoliasearch('TBTLJDRAYW', 'b272d37c85243e2e30ac4867e9dbcd58');
+	/// thenewstack.io
+	var client = algoliasearch('TR8Q1WH2YG', '4eb191af6de81c46c3e14fde0d594bf3');
+
+	function debounce(func, wait, immediate) {
+		var timeout;
+		return function() {
+			var context = this, args = arguments;
+			var later = function() {
+				timeout = null;
+				if (!immediate) func.apply(context, args);
+			};
+			var callNow = immediate && !timeout;
+			clearTimeout(timeout);
+			timeout = setTimeout(later, wait);
+			if (callNow) func.apply(context, args);
+		};
+	};
+
+	function searchPreview(query) {
+
+		if (!query) return;
+
+		$('.search-preview').animate({
+			scrollTop : 0
+		}, 0);
+
+		$('.search-preview-stories').empty();
+		$('.search-preview-tags').empty();
+		$('.search-preview-authors').empty();
+
+		$('.search-popular').hide();
+
+		client.initIndex('wp_posts_post').search({
+			query : query,
+			hitsPerPage : 3
+		}, function(error, content) {
+
+			if (error) console.log(error);
+
+			$.each(content.hits, function(index, hit) {
+				var result = '<a href="' + hit.permalink + '" class="search-preview-result">' + hit.post_title + '</a>';
+				$('.search-preview-stories').append(result);
+			});
+
+			$('.search-preview').show();
+
+		});
+
+		client.initIndex('wp_terms_post_tag').search({
+			query : query,
+			hitsPerPage : 3
+		}, function(error, content) {
+
+			if (error) console.log(error);
+
+			$.each(content.hits, function(index, hit) {
+				var result = '<a href="' + hit.permalink + '" class="search-preview-result">' + hit.name + '</a>';
+				$('.search-preview-tags').append(result);
+			});
+
+			$('.search-preview').show();
+
+		});
+
+		client.initIndex('wp_users').search({
+			query : query,
+			hitsPerPage : 3
+		}, function(error, content) {
+
+			if (error) console.log(error);
+
+			$.each(content.hits, function(index, hit) {
+				var result = '<a href="' + hit.posts_url + '" class="search-preview-result">' + hit.display_name + '</a>';
+				$('.search-preview-authors').append(result);
+			});
+
+			$('.search-preview').show();
+
+		});
+
+	}
+
+	function searchResults(dataset, query) {
+
+		if (!query) return;
+
+		if (!dataset) dataset = 'wp_posts_post';
+		index = client.initIndex(dataset);
+
+		$('.search-preview-stories').empty();
+		$('.search-preview-tags').empty();
+		$('.search-preview-authors').empty();
+		$('.search-results-list').empty();
+
+		$('.search-popular').hide();
+		$('.search-preview').hide();
+
+		$('.search-filter-option').removeClass('search-filter-option-active');
+
+		var filterTarget = 'stories';
+		if (dataset === 'wp_posts_post') filterTarget = 'stories';
+		if (dataset === 'wp_terms_post_tag') filterTarget = 'tags';
+		if (dataset === 'wp_users') filterTarget = 'authors';
+		$('.search-filter-option-' + filterTarget).addClass('search-filter-option-active');
+
+		index.search(query, function(error, content) {
+
+			if (error) console.log(error);
+
+			$.each(content.hits, function(i, hit) {
+
+				if (dataset === 'wp_posts_post') {
+
+					var cats = '';
+
+					var numCats = hit.taxonomies.category.length;
+					$(hit.taxonomies.category).each(function(index, cat) {
+						if (index == (numCats - 1)) {
+							var endString = '</a>';
+						} else {
+							var endString = ' / </a>';
+						}
+						cats = cats + '<a href="/category/' + cat + '/" alt="View all posts in ' + cat + '">'+ cat + endString;
+					});
+
+					var result = $('#search-result-story-card').html();
+					result = result.split('***permalink***').join(hit.permalink);
+					result = result.split('***cats***').join(cats);
+					result = result.split('***title***').join(hit.post_title);
+					result = result.split('***thumbnail***').join(hit.images.thumbnail.url.replace('150x150','290x120'));
+
+					var date = new Date(hit.post_date * 1000);
+					var formattedDate = date.format('d M Y h:ia');
+					result = result.split('***date***').join(formattedDate);
+
+					var authors = hit.taxonomies.author;
+					var authorsHTML = '';
+
+					$.each(authors, function(i, authorSlug) {
+
+						authorSlug = authorSlug.toLowerCase().replace(' ', '-');
+						var authorURL = 'https://thenewstack.io/author/' + authorSlug + '/';
+
+						var userIndex = client.initIndex('wp_users');
+						userIndex.search('', {
+							facetFilters : 'posts_url:' + authorURL
+						}, function(error, doc) {
+
+							var authorDisplayName = doc.hits[0].display_name;
+
+							if (authorsHTML === '') {
+								authorsHTML += '<a href="' + authorURL + '" class="author url fn" rel="author">' + authorDisplayName + '</a> '
+							} else {
+								authorsHTML += ' and <a href="' + authorURL + '" class="author url fn" rel="author">' + authorDisplayName + '</a> '
+							}
+
+							if (i + 1 === authors.length) {
+								result = result.split('***bylines***').join(authorsHTML);
+								$('.search-results-list').append(result);
+						    }
+
+						});
+
+					});
+
+				}
+
+				if (dataset === 'wp_terms_post_tag') {
+					var result = '<a href="' + hit.permalink + '" class="search-result-tag">' + hit.name + '</a>';
+					$('.search-results-list').append(result);
+				}
+
+				if (dataset === 'wp_users') {
+					var result = '<a href="' + hit.posts_url + '">' + hit.display_name + '</a><br>';
+					$('.search-results-list').append(result);
+				}
+
+			});
+
+			$('.search-results-list').show();
+			$('.search-filter-nav').show();
+			$('.search-results').show();
+
+		});
+
+	}
+
+	function clearCancel() {
+
+		var query = $('.search-input').val();
+		$('.search-input').focus();
+
+		if (query) {
+
+			$('.search-cancel').css({ opacity : 0.5 });
+
+		} else {
+
+			$('.search-cancel').css({ opacity : 0 });
+
+			$('.search-popular').show();
+			$('.search-preview').hide();
+			$('.search-results').hide();
+			$('.search-filter-nav').hide();
+
+			$('.search-preview-stories').empty();
+			$('.search-preview-tags').empty();
+			$('.search-preview-authors').empty();
+			$('.search-results-list').empty();
+
+		}
+
+	}
+
+
+
+	$(document).ready(function() {
+
+
+
+		$('.search-input').focus();
+		var currentPreviewHighlightItem = -1;
+
+		var existingQuery = $('.search-input').val();
+		if (existingQuery)  {
+			$('.search-popular').show();
+			$('.search-cancel').css({ opacity : 0.5 });
+			currentPreviewHighlightItem = -1;
+			searchPreview(existingQuery);
+		}
+
+
+
+		$('.search-input').on('click', function() {
+			var query = $(this).val();
+			return searchPreview(query);
+		});
+
+		$('.search-input').on('keyup', function() {
+			if (event.which == 40 || event.which == 38) return;
+			clearCancel();
+		});
+
+		$('.search-input').on('keyup', debounce(function(event) {
+
+			if (event.which == 40 || event.which == 38) return;
+
+			var query = $(this).val();
+
+			currentPreviewHighlightItem = -1;
+
+			if (event.which == 13) {
+
+				var $activePreviewResult = $('.search-preview-highlight');
+
+				if ($activePreviewResult.length > 0) {
+
+					var url = $activePreviewResult.attr('href');
+					var dataSet = $activePreviewResult.attr('data-dataset');
+
+					if (dataSet) {
+						return searchResults(dataSet, query);
+					}
+
+					location.href = url;
+
+					return;
+
+				} else {
+
+					return searchResults(null, query);
+
+				}
+
+			} else {
+
+				return searchPreview(query);
+
+			}
+
+		}, 500));
+
+
+
+		$('.search-cancel').on('click', function() {
+			$('.search-input').val('');
+			$('.search-results-list').empty();
+			clearCancel();
+		});
+
+
+
+		$('.search-filter-option').on('click', function(event) {
+			event.preventDefault();
+			var dataset = $(this).attr('data-dataset');
+			var query = $('.search-input').val();
+			searchResults(dataset, query);
+		});
+
+
+
+		$(document).on('keydown', function(event) {
+
+			if (event.which != 40 && event.which != 38) return;
+
+			$('.search-preview-header').removeClass('search-preview-highlight');
+			$('.search-preview-result').removeClass('search-preview-highlight');
+
+			var targets = [];
+
+			targets.push($('.search-preview-stories-header'));
+			$('.search-preview-stories').children().each(function(){
+				targets.push($(this));
+			});
+
+			targets.push($('.search-preview-tags-header'));
+			$('.search-preview-tags').children().each(function(){
+				targets.push($(this));
+			});
+
+			targets.push($('.search-preview-authors-header'));
+			$('.search-preview-authors').children().each(function(){
+				targets.push($(this));
+			});
+
+			if (event.which == 40) currentPreviewHighlightItem++;
+			if (event.which == 38) currentPreviewHighlightItem--;
+
+			if (currentPreviewHighlightItem >= targets.length) {
+				currentPreviewHighlightItem = targets.length - 1;
+			}
+
+			if (currentPreviewHighlightItem < 0) {
+				currentPreviewHighlightItem = 0;
+			}
+
+			targets[currentPreviewHighlightItem].addClass('search-preview-highlight');
+
+		});
+
+		$('.search-preview-header').on('click', function(event) {
+			event.preventDefault();
+			var dataset = $(this).attr('data-dataset');
+			var query = $('.search-input').val();
+			searchResults(dataset, query);
+		});
+
+
+
+	});
+
+</script>
+		</div>
+
+		<nav id="responsive-menu">
+
+			<div class="menu-close">x</div>
+
+			<h4>Content</h4>
+			<div class="menu-primary-menu-container"><ul id="resp-primary" class="menu"><li id="menu-item-1937460" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-1937460"><h5 class="reversedlinks"><a href="https://thenewstack.io/category/analysis/">Analysis</a></h5></li>
+<li id="menu-item-1426855" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1426855"><h5 class="reversedlinks"><a href="/ebooks/">Ebooks</a></h5></li>
+<li id="menu-item-28271" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-28271"><h5 class="reversedlinks"><a href="https://thenewstack.io/events/">Events</a></h5></li>
+<li id="menu-item-880403" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-880403"><h5 class="reversedlinks"><a href="https://thenewstack.io/podcasts/">Podcasts</a></h5></li>
+<li id="menu-item-1937807" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-1937807"><h5 class="reversedlinks"><a href="https://thenewstack.io/category/research/">Research</a></h5></li>
+<li id="menu-item-1937461" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-1937461"><h5 class="reversedlinks"><a href="#">Topic Hubs <span class="dashicons dashicons-arrow-down"></span></a></h5>
+<ul class="sub-menu">
+	<li id="menu-item-1937462" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937462"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/architecture/">Architecture</a></h5></li>
+	<li id="menu-item-1937475" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937475"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/data/">Data</a></h5></li>
+	<li id="menu-item-1937463" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937463"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/development/">Development</a></h5></li>
+	<li id="menu-item-1937464" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937464"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/diy/">Do-It-Yourself</a></h5></li>
+	<li id="menu-item-1937465" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937465"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/operations/">Operations</a></h5></li>
+	<li id="menu-item-1937476" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937476"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/security/">Security</a></h5></li>
+	<li id="menu-item-1937466" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937466"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/tech-culture/">Tech Culture</a></h5></li>
+</ul>
+</li>
+<li id="menu-item-1937467" class="primary-nav-last-option menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-1937467"><h5 class="reversedlinks"><a href="#">Ecosystems <span class="dashicons dashicons-arrow-down"></span></a></h5>
+<ul class="sub-menu">
+	<li id="menu-item-1937468" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937468"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/artificial-intelligence/">Artificial Intelligence</a></h5></li>
+	<li id="menu-item-1937469" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937469"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/cloud/">Cloud</a></h5></li>
+	<li id="menu-item-1937470" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937470"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/containers/">Containers</a></h5></li>
+	<li id="menu-item-1937471" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937471"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/kubernetes/">Kubernetes</a></h5></li>
+	<li id="menu-item-1937472" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937472"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/microservices/">Microservices</a></h5></li>
+	<li id="menu-item-1937473" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937473"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/node-js/">Node.js</a></h5></li>
+	<li id="menu-item-1937474" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937474"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/serverless/">Serverless</a></h5></li>
+</ul>
+</li>
+<li id="menu-item-599" class="menu-bar menu-item menu-item-type-custom menu-item-object-custom menu-item-599"><h5 class="reversedlinks"><a href="#">mobile-menu-icon</a></h5></li>
+<li id="menu-item-598" class="navsearch menu-item menu-item-type-custom menu-item-object-custom menu-item-598"><h5 class="reversedlinks"><a href="#">search-icon</a></h5></li>
+</ul></div>
+			<h4>Topic Hubs</h4>
+			<div class="menu-topic-hubs-container"><ul id="resp-topic-hubs" class="menu"><li id="menu-item-1937477" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937477"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/architecture/">Architecture</a></h5></li>
+<li id="menu-item-1937478" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937478"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/data/">Data</a></h5></li>
+<li id="menu-item-1937479" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937479"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/development/">Development</a></h5></li>
+<li id="menu-item-1937480" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937480"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/diy/">Do-It-Yourself</a></h5></li>
+<li id="menu-item-1937481" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937481"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/operations/">Operations</a></h5></li>
+<li id="menu-item-1937482" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937482"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/security/">Security</a></h5></li>
+<li id="menu-item-1937483" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937483"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/tech-culture/">Tech Culture</a></h5></li>
+</ul></div>
+			<h4>Ecosystems</h4>
+			<div class="menu-ecosystems-container"><ul id="resp-ecosystems" class="menu"><li id="menu-item-1937484" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937484"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/artificial-intelligence/">AI</a></h5></li>
+<li id="menu-item-1937485" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937485"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/cloud/">Cloud</a></h5></li>
+<li id="menu-item-1937486" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937486"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/containers/">Containers</a></h5></li>
+<li id="menu-item-1937487" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937487"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/kubernetes/">Kubernetes</a></h5></li>
+<li id="menu-item-1937488" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937488"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/microservices/">Microservices</a></h5></li>
+<li id="menu-item-1937489" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937489"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/node-js/">Node.js</a></h5></li>
+<li id="menu-item-1937490" class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937490"><h5 class="reversedlinks"><a href="https://thenewstack.io/tag/serverless/">Serverless</a></h5></li>
+</ul></div>
+			<h4>The New Stack</h4>
+			<div class="menu-the-new-stack-container"><ul id="resp-ancillary" class="menu"><li id="menu-item-600" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-600"><h5 class="reversedlinks"><a href="https://thenewstack.io/about-2/">About</a></h5></li>
+<li id="menu-item-601" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-601"><h5 class="reversedlinks"><a href="https://thenewstack.io/contact/">Contact</a></h5></li>
+<li id="menu-item-3543938" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3543938"><h5 class="reversedlinks"><a href="https://thenewstack.io/contributions/">Contributions</a></h5></li>
+<li id="menu-item-602" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-602"><h5 class="reversedlinks"><a href="https://thenewstack.io/sponsors/">Sponsors</a></h5></li>
+<li id="menu-item-764345" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-764345"><h5 class="reversedlinks"><a href="https://thenewstack.io/privacy-policy/">Privacy Policy</a></h5></li>
+<li id="menu-item-3543937" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3543937"><h5 class="reversedlinks"><a href="https://thenewstack.io/terms-of-use/">Terms of Use</a></h5></li>
+</ul></div>
+			<h4>Follow</h4>
+			<div class="menu-follow-container"><ul id="resp-follow" class="menu"><li id="menu-item-583" class="twitter menu-item menu-item-type-custom menu-item-object-custom menu-item-583"><h5 class="reversedlinks"><a target="_blank" href="https://twitter.com/thenewstack">Twitter</a></h5></li>
+<li id="menu-item-584" class="facebook menu-item menu-item-type-custom menu-item-object-custom menu-item-584"><h5 class="reversedlinks"><a target="_blank" href="https://www.facebook.com/thenewstack">Facebook</a></h5></li>
+<li id="menu-item-224124" class="youtube menu-item menu-item-type-custom menu-item-object-custom menu-item-224124"><h5 class="reversedlinks"><a target="_blank" href="https://www.youtube.com/channel/UCWea_KfCnTMD39uQuA5TKOQ">YouTube</a></h5></li>
+<li id="menu-item-880401" class="soundcloud menu-item menu-item-type-custom menu-item-object-custom menu-item-880401"><h5 class="reversedlinks"><a target="_blank" href="https://soundcloud.com/search?q=the%20new%20stack">Soundcloud</a></h5></li>
+<li id="menu-item-586" class="linkedin menu-item menu-item-type-custom menu-item-object-custom menu-item-586"><h5 class="reversedlinks"><a target="_blank" href="https://www.linkedin.com/company/6611720">LinkedIn</a></h5></li>
+<li id="menu-item-880402" class="slideshare menu-item menu-item-type-custom menu-item-object-custom menu-item-880402"><h5 class="reversedlinks"><a target="_blank" href="http://www.slideshare.net/TheNewStack">Slideshare</a></h5></li>
+<li id="menu-item-1767" class="rss menu-item menu-item-type-custom menu-item-object-custom menu-item-1767"><h5 class="reversedlinks"><a target="_blank" href="http://thenewstack.io/rss-feeds">RSS</a></h5></li>
+</ul></div>
+		</nav>
+
+		<!--div id="page" class="hfeed site"-->
+
+		<div class="overlay"></div>
+
+		<div class="top-bar-wrap">
+			<div class="top-bar">
+
+				<nav id="ancillary" class="ancillary-navigation" role="navigation">
+					<div class="menu-the-new-stack-container"><ul id="top-ancillary" class="menu"><li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-600"><h5 class="reversedlinks"><a href="https://thenewstack.io/about-2/">About</a></h5></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-601"><h5 class="reversedlinks"><a href="https://thenewstack.io/contact/">Contact</a></h5></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3543938"><h5 class="reversedlinks"><a href="https://thenewstack.io/contributions/">Contributions</a></h5></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-602"><h5 class="reversedlinks"><a href="https://thenewstack.io/sponsors/">Sponsors</a></h5></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-764345"><h5 class="reversedlinks"><a href="https://thenewstack.io/privacy-policy/">Privacy Policy</a></h5></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3543937"><h5 class="reversedlinks"><a href="https://thenewstack.io/terms-of-use/">Terms of Use</a></h5></li>
+</ul></div><div class="menu-follow-container"><ul id="top-follow" class="menu"><li class="twitter menu-item menu-item-type-custom menu-item-object-custom menu-item-583"><a target="_blank" href="https://twitter.com/thenewstack">Twitter</a></li>
+<li class="facebook menu-item menu-item-type-custom menu-item-object-custom menu-item-584"><a target="_blank" href="https://www.facebook.com/thenewstack">Facebook</a></li>
+<li class="youtube menu-item menu-item-type-custom menu-item-object-custom menu-item-224124"><a target="_blank" href="https://www.youtube.com/channel/UCWea_KfCnTMD39uQuA5TKOQ">YouTube</a></li>
+<li class="soundcloud menu-item menu-item-type-custom menu-item-object-custom menu-item-880401"><a target="_blank" href="https://soundcloud.com/search?q=the%20new%20stack">Soundcloud</a></li>
+<li class="linkedin menu-item menu-item-type-custom menu-item-object-custom menu-item-586"><a target="_blank" href="https://www.linkedin.com/company/6611720">LinkedIn</a></li>
+<li class="slideshare menu-item menu-item-type-custom menu-item-object-custom menu-item-880402"><a target="_blank" href="http://www.slideshare.net/TheNewStack">Slideshare</a></li>
+<li class="rss menu-item menu-item-type-custom menu-item-object-custom menu-item-1767"><a target="_blank" href="http://thenewstack.io/rss-feeds">RSS</a></li>
+</ul></div>				</nav>
+
+			</div>
+		</div>
+
+		<div class="nav-bar clearfix">
+
+			<header id="masthead" class="site-header" role="banner">
+
+				<a class="site-branding" href="https://thenewstack.io/" rel="home">
+					<img id="TNS-Logo" src="https://cdn.thenewstack.io/static/img/The-New-Stack-Logo.svg">
+				</a>
+
+				<nav id="site-navigation" class="main-navigation" role="navigation">
+
+					<a class="skip-link screen-reader-text" href="#content">
+						Skip to content					</a>
+
+					<div class="menu-primary-menu-container"><ul id="menu-primary-menu" class="menu"><li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-1937460"><h5 class="links"><a href="https://thenewstack.io/category/analysis/">Analysis</a></h5></li>
+<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1426855"><h5 class="links"><a href="/ebooks/">Ebooks</a></h5></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-28271"><h5 class="links"><a href="https://thenewstack.io/events/">Events</a></h5></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-880403"><h5 class="links"><a href="https://thenewstack.io/podcasts/">Podcasts</a></h5></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-1937807"><h5 class="links"><a href="https://thenewstack.io/category/research/">Research</a></h5></li>
+<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-1937461"><h5 class="links"><a href="#">Topic Hubs <span class="dashicons dashicons-arrow-down"></span></a></h5>
+<ul class="sub-menu">
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937462"><h5 class="links"><a href="https://thenewstack.io/tag/architecture/">Architecture</a></h5></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937475"><h5 class="links"><a href="https://thenewstack.io/tag/data/">Data</a></h5></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937463"><h5 class="links"><a href="https://thenewstack.io/tag/development/">Development</a></h5></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937464"><h5 class="links"><a href="https://thenewstack.io/tag/diy/">Do-It-Yourself</a></h5></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937465"><h5 class="links"><a href="https://thenewstack.io/tag/operations/">Operations</a></h5></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937476"><h5 class="links"><a href="https://thenewstack.io/tag/security/">Security</a></h5></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937466"><h5 class="links"><a href="https://thenewstack.io/tag/tech-culture/">Tech Culture</a></h5></li>
+</ul>
+</li>
+<li class="primary-nav-last-option menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-1937467"><h5 class="links"><a href="#">Ecosystems <span class="dashicons dashicons-arrow-down"></span></a></h5>
+<ul class="sub-menu">
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937468"><h5 class="links"><a href="https://thenewstack.io/tag/artificial-intelligence/">Artificial Intelligence</a></h5></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937469"><h5 class="links"><a href="https://thenewstack.io/tag/cloud/">Cloud</a></h5></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937470"><h5 class="links"><a href="https://thenewstack.io/tag/containers/">Containers</a></h5></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937471"><h5 class="links"><a href="https://thenewstack.io/tag/kubernetes/">Kubernetes</a></h5></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937472"><h5 class="links"><a href="https://thenewstack.io/tag/microservices/">Microservices</a></h5></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937473"><h5 class="links"><a href="https://thenewstack.io/tag/node-js/">Node.js</a></h5></li>
+	<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937474"><h5 class="links"><a href="https://thenewstack.io/tag/serverless/">Serverless</a></h5></li>
+</ul>
+</li>
+<li class="menu-bar menu-item menu-item-type-custom menu-item-object-custom menu-item-599"><h5 class="links"><a href="#">mobile-menu-icon</a></h5></li>
+<li class="navsearch menu-item menu-item-type-custom menu-item-object-custom menu-item-598"><h5 class="links"><a href="#">search-icon</a></h5></li>
+</ul></div>
+				</nav>
+
+			</header>
+
+		</div>
+
+	<div id="primary" class="content-area">
+
+		<main id="main" class="site-main" role="main">
+
+		
+<article id="146592" class="post-146592 post type-post status-publish format-standard has-post-thumbnail hentry category-technology category-tutorials tag-apis tag-development tag-go tag-golang tag-json tag-restful-api region-global">
+
+	<div id="post-date" style="display: none;">
+		2014-11-26 10:38:14	</div>
+
+	<div id="post-title" style="display: none;">
+		Making a RESTful JSON API in Go	</div>
+
+	<div id="post-tags" style="display: none;">
+		apis,development,go,golang,json,restful-api,	</div>
+
+	<header class="entry-header">
+
+		<h4>
+	        <a href="https://thenewstack.io/category/technology/" alt="View all posts in Technology">Technology</a> / <a href="https://thenewstack.io/category/tutorials/" alt="View all posts in Tutorials">Tutorials</a> / <a href="https://thenewstack.io/region/global/" rel="tag">Global</a> 	    </h4>
+
+		<h1>Making a RESTful JSON API in Go</h1>
+
+		<h4 class="timestamp">
+		26 Nov 2014 10:38am,
+
+		by <span class="links">
+			<a href="https://thenewstack.io/author/corylanou/" title="Posts by Cory Lanou" class="author url fn" rel="author">Cory Lanou</a>	 		</span>
+
+	    </h4>
+
+	</header>
+
+
+	<div class="postfeat">
+		<img width="640" height="400" src="https://cdn.thenewstack.io/media/2014/11/goraster-1024x640.png" class="attachment-large size-large wp-post-image wp-stateless-item" alt="" data-image-size="large" data-stateless-media-bucket="cdn.thenewstack.io" data-stateless-media-name="media/2014/11/goraster.png" />	</div>
+
+
+	<div class="resp-container">
+
+		<div class="postshare">
+
+			<div class="social-header">
+
+				<!-- Simple Share Buttons Adder (7.3.10) simplesharebuttons.com --><div class="ssba ssba-wrap"><div style="text-align:left"><a data-site="" class="ssba_twitter_share" href="http://twitter.com/share?url=https://thenewstack.io/make-a-restful-json-api-go/&amp;text=Making%20a%20RESTful%20JSON%20API%20in%20Go%20"  target=&quot;_blank&quot; ><img src="https://thenewstack.io/wp-content/plugins/simple-share-buttons-adder/buttons/somacro/twitter.png" title="Twitter" class="ssba ssba-img" alt="Tweet about this on Twitter" /></a><a data-site="reddit" class="ssba_reddit_share" href="http://reddit.com/submit?url=https://thenewstack.io/make-a-restful-json-api-go/&amp;title=Making a RESTful JSON API in Go"  target=&quot;_blank&quot; ><img src="https://thenewstack.io/wp-content/plugins/simple-share-buttons-adder/buttons/somacro/reddit.png" title="Reddit" class="ssba ssba-img" alt="Share on Reddit" /></a><a data-site="" class="ssba_facebook_share" href="http://www.facebook.com/sharer.php?u=https://thenewstack.io/make-a-restful-json-api-go/"  target="_blank" ><img src="https://thenewstack.io/wp-content/plugins/simple-share-buttons-adder/buttons/somacro/facebook.png" title="Facebook" class="ssba ssba-img" alt="Share on Facebook" /></a><a data-site="linkedin" class="ssba_linkedin_share ssba_share_link" href="http://www.linkedin.com/shareArticle?mini=true&amp;url=https://thenewstack.io/make-a-restful-json-api-go/"  target=&quot;_blank&quot; ><img src="https://thenewstack.io/wp-content/plugins/simple-share-buttons-adder/buttons/somacro/linkedin.png" title="LinkedIn" class="ssba ssba-img" alt="Share on LinkedIn" /></a></div></div>
+				<script>
+					var $ = jQuery;
+					$(document).ready(function() {
+						var $element = $('.ssba_hackernews_share');
+						$('.ssba-wrap div').append($element);
+					});
+				</script>
+
+				<a data-site="hackernews" class="ssba_hackernews_share" href="https://news.ycombinator.com/submitlink?u=https://thenewstack.io/make-a-restful-json-api-go/&t=Making a RESTful JSON API in Go" target="_blank">
+					<img src="" title="Hacker News" class="ssba ssba-img" alt="Share on Hacker News">
+				</a>
+
+				<div class="commentcloud">
+
+					
+	                <a id="showbox" href="//thenewstack.io/make-a-restful-json-api-go/#disqus_thread">+</a>
+
+	        	</div>
+
+			</div>
+
+		</div>
+
+
+		<div class="entry-content">
+
+			
+			<div class="post-content">
+				<p>In this post, we will not only cover how to use Go to create a RESTful JSON API, but we will also talk about good RESTful design. If you have ever consumed an API in the past that doesn&#8217;t follow good design, then you end up writing bad code to consume a bad API. Hopefully, after this article you will have a better idea of what a well behaved API should look like.</p>
+<h2>What is a JSON API?</h2>
+<p>Before JSON, there was XML. Having used XML and JSON both, there is no question that JSON is the clear winner. I&#8217;m not going to cover in depth the concept of a JSON API, as it is detailed quite well on <a href="http://jsonapi.org/" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">jsonapi.org</a>.</p>
+
+	<div class="sponsor_note">
+
+			<div class="note-heading"><strong>Sponsor Note</strong></div>
+								<img src="http://thenewstack.io/wp-content/uploads/2015/09/Event_ShortStack_springone2GX2015_Square300.png" class="alignright logo2x" alt="sponsor logo">
+							<div class="note-content">
+				
+				 <span class="link-complex-target"><a href="https://2015.event.springone2gx.com/schedule/2015-09-15" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">SpringOne2GX</a></span> is a conference for app developers, solution and data architects. Sessions are specifically tailored for developers and architects using the popular open source Spring IO Projects, Groovy &amp; Grails, Cloud Foundry, RabbitMQ, Redis, Geode, Hadoop and Tomcat technologies.			</div>
+	
+	</div>
+
+
+
+<h2>A Basic Web Server</h2>
+<p>A RESTful service starts with fundamentally being a web service first. Here is a really basic web server that responds to any requests by simply outputting the request url:</p>
+<pre>package main
+
+import (
+    "fmt"
+    "html"
+    "log"
+    "net/http"
+)
+
+func main() {
+    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+    })
+
+    log.Fatal(http.ListenAndServe(":8080", nil))
+
+}
+</pre>
+<p>Running this example will spin up a server on port 8080, and can be accessed at <a href="http://localhost:8080/" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">http://localhost:8080</a></p>
+<h2>Adding a Router</h2>
+<p>While the standard library comes with a router, I find that most people are confused about how it works. I&#8217;ve used a couple of third party routers in my projects. Most notably I&#8217;ve used the <a href="http://www.gorillatoolkit.org/pkg/mux" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">mux router</a> from the <a href="http://www.gorillatoolkit.org/" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">Gorilla Web Toolkit</a>.</p>
+<p>Another popular router is from Julien Schmidt called <a href="https://github.com/julienschmidt/httprouter" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">httprouter</a>.</p>
+<pre>package main
+
+import (
+    "fmt"
+    "html"
+    "log"
+    "net/http"
+
+    "github.com/gorilla/mux"
+)
+
+func main() {
+
+    router := mux.NewRouter().StrictSlash(true)
+    router.HandleFunc("/", Index)
+    log.Fatal(http.ListenAndServe(":8080", router))
+}
+
+func Index(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+</pre>
+<p>To run this example, you will now need to execute the following command:</p>
+<pre>go get</pre>
+<p>This will retrieve the Gorilla Mux package from GitHub at &#8220;github.com/gorilla/mux&#8221;</p>
+<p>The above example creates a basic router, adds the route / and assigns the Index handler to run when that endpoint is called. You will also notice now that before we could ask for <a href="http://localhost:8080/foo" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">http://localhost:8080/foo</a> and that worked. That will no longer work now as there is no route defined. Only <a href="http://localhost:8080/" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">http://localhost:8080</a> will be a valid response.</p>
+<h2>Creating Some Basic Routes</h2>
+<p>Now that we have a router in place, it is time to create some more routes.</p>
+<p>Let&#8217;s assume that we are going to create a basic ToDo app.</p>
+<pre>package main
+
+import (
+    "fmt"
+    "log"
+    "net/http"
+
+    "github.com/gorilla/mux"
+)
+
+func main() {
+
+    router := mux.NewRouter().StrictSlash(true)
+    router.HandleFunc("/", Index)
+    router.HandleFunc("/todos", TodoIndex)
+    router.HandleFunc("/todos/{todoId}", TodoShow)
+
+    log.Fatal(http.ListenAndServe(":8080", router))
+}
+
+func Index(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintln(w, "Welcome!")
+}
+
+func TodoIndex(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintln(w, "Todo Index!")
+}
+
+func TodoShow(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    todoId := vars["todoId"]
+    fmt.Fprintln(w, "Todo show:", todoId)
+}
+</pre>
+<p>We have now added two more endpoints (or routes)</p>
+<p>This is the Todo Index route: <a href="http://localhost:8080/todos" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">http://localhost:8080/todos</a></p>
+<p>THis is the Todo Show route: <a href="http://localhost:8080/todos/%7BtodoId%7D" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">http://localhost:8080/todos/{todoId}</a></p>
+<p>This is the beginning of a RESTful design.</p>
+<p>Pay close attention to the last route where we added a variable in the route, called todoId: http://localhost:8080/todos/{todoId}</p>
+<p>This will allow us to pass in id&#8217;s to the route and respond with the proper records.</p>
+<h2>A Basic Model</h2>
+<p>Now that we have routes in place, it&#8217;s time to create a basic Todo model that we can send and retrieve data with. In Go, a struct will typically serve as your model. Many other languages use classes for this purpose.</p>
+<pre>package main
+
+import "time"
+
+type Todo struct {
+    Name      string
+    Completed bool
+    Due       time.Time
+}
+
+type Todos []Todo
+</pre>
+<p>Note that in the last line we create another type, called Todos, which is a slice (an ordered collection) of Todo. You will see where this becomes useful shortly.</p>
+<h2>Send Back Some JSON</h2>
+<p>Now that we have a basic model, we can simulate a real response and mock out the TodoIndex with static data.</p>
+<pre>func TodoIndex(w http.ResponseWriter, r *http.Request) {
+    todos := Todos{
+        Todo{Name: "Write presentation"},
+        Todo{Name: "Host meetup"},
+    }
+
+    json.NewEncoder(w).Encode(todos)
+}
+</pre>
+<p>For now, we are just creating a static slice of Todos to send back to the client. Now if you requesthttp://localhost:8080/todos, you should get the following response:</p>
+<pre>[
+    {
+        "Name": "Write presentation",
+        "Completed": false,
+        "Due": "0001-01-01T00:00:00Z"
+    },
+    {
+        "Name": "Host meetup",
+        "Completed": false,
+        "Due": "0001-01-01T00:00:00Z"
+    }
+]
+</pre>
+<h2>A Better Model</h2>
+<p>For any seasoned veterans out there, you have already spotted a problem. As insignificant as it sounds, it&#8217;s not idiomatic JSON to have uppercased keys. Here is how you solve that.</p>
+<pre>package main
+
+import "time"
+
+type Todo struct {
+    Name      string    `json:"name"`
+    Completed bool      `json:"completed"`
+    Due       time.Time `json:"due"`
+}
+
+type Todos []Todo
+</pre>
+<p>By adding struct tags you can control exactly what an how your struct will be marshalled to JSON.</p>
+<h2>OK, We Need to Split This Up!</h2>
+<p>At this point, the project needs a little refactoring. We have too much going on in just a few files.</p>
+<p>We are going to now create the following files and move the code around accordingly:</p>
+<ul>
+<li>main.go</li>
+<li>handlers.go</li>
+<li>routes.go</li>
+<li>todo.go</li>
+</ul>
+<h3>Handlers.go</h3>
+<pre>package main
+
+import (
+    "encoding/json"
+    "fmt"
+    "net/http"
+
+    "github.com/gorilla/mux"
+)
+
+func Index(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintln(w, "Welcome!")
+}
+
+func TodoIndex(w http.ResponseWriter, r *http.Request) {
+    todos := Todos{
+        Todo{Name: "Write presentation"},
+        Todo{Name: "Host meetup"},
+    }
+
+    if err := json.NewEncoder(w).Encode(todos); err != nil {
+        panic(err)
+    }
+}
+
+func TodoShow(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    todoId := vars["todoId"]
+    fmt.Fprintln(w, "Todo show:", todoId)
+}
+
+</pre>
+<h3>Routes.go</h3>
+<pre>package main
+
+import (
+    "net/http"
+
+    "github.com/gorilla/mux"
+)
+
+type Route struct {
+    Name        string
+    Method      string
+    Pattern     string
+    HandlerFunc http.HandlerFunc
+}
+
+type Routes []Route
+
+func NewRouter() *mux.Router {
+
+    router := mux.NewRouter().StrictSlash(true)
+    for _, route := range routes {
+        router.
+            Methods(route.Method).
+            Path(route.Pattern).
+            Name(route.Name).
+            Handler(route.HandlerFunc)
+    }
+
+    return router
+}
+
+var routes = Routes{
+    Route{
+        "Index",
+        "GET",
+        "/",
+        Index,
+    },
+    Route{
+        "TodoIndex",
+        "GET",
+        "/todos",
+        TodoIndex,
+    },
+    Route{
+        "TodoShow",
+        "GET",
+        "/todos/{todoId}",
+        TodoShow,
+    },
+}
+</pre>
+<h3>Todo.go</h3>
+<pre>package main
+
+import "time"
+
+type Todo struct {
+    Name      string    `json:"name"`
+    Completed bool      `json:"completed"`
+    Due       time.Time `json:"due"`
+}
+
+type Todos []Todo
+
+</pre>
+<h3>Main.go</h3>
+<pre>package main
+
+import (
+    "log"
+    "net/http"
+)
+
+func main() {
+
+    router := NewRouter()
+
+    log.Fatal(http.ListenAndServe(":8080", router))
+}
+</pre>
+<h2>Even Better Routing</h2>
+<p>As part of our refactoring, we created a much more versatile routes file. This new file now utilizes a struct to contain more detailed information about the route. Specifically, we can now specify the action, such as GET, POST, DELETE, etc.</p>
+<h2>Outputting a Web Log</h2>
+<p>In splitting up the routes file, I also had an ulterior motive. As you will see shortly, it now becomes very easy to decorate my http handlers with additional functionality.</p>
+<p>Let&#8217;s start with the ability to log out web requests like most modern web servers do. In Go, there is no web logging package or functionality in the standard library, so we have to create it.</p>
+<p>We&#8217;ll do that by creating a file called logger.go and add the following code:</p>
+<pre>package main
+
+import (
+    "log"
+    "net/http"
+    "time"
+)
+
+func Logger(inner http.Handler, name string) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        start := time.Now()
+
+        inner.ServeHTTP(w, r)
+
+        log.Printf(
+            "%s\t%s\t%s\t%s",
+            r.Method,
+            r.RequestURI,
+            name,
+            time.Since(start),
+        )
+    })
+}
+</pre>
+<p>This is a very standard idiom in Go. Effectively we are going to pass our handler to this function, which will then wrap the passed handler with logging and timing functionality.</p>
+<p>Next, we will need to utilize the logger decorator in our routes.</p>
+<h2>Applying the Logger Decorator</h2>
+<p>To apply the decorator, when we create the router, we will simply wrap all our current routes in it by updating our NewRouter function:</p>
+<pre>func NewRouter() *mux.Router {
+
+    router := mux.NewRouter().StrictSlash(true)
+    for _, route := range routes {
+        var handler http.Handler
+
+        handler = route.HandlerFunc
+        handler = Logger(handler, route.Name)
+
+        router.
+            Methods(route.Method).
+            Path(route.Pattern).
+            Name(route.Name).
+            Handler(handler)
+    }
+
+    return router
+}
+</pre>
+<p>Now, when you request <a href="http://localhost:8080/todos" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">http://localhost:8080/todos</a> you should see something like this logged at the console:</p>
+<pre>2014/11/19 12:41:39 GET /todos  TodoIndex       148.324us</pre>
+<h2>This Routes File is Crazy &#8230; Let&#8217;s Refactor</h2>
+<p>Now that the routes file has gotten a little larger, let&#8217;s split it to the following files:</p>
+<ul>
+<li>router.go</li>
+<li>routes.go</li>
+</ul>
+<h3>Routes.go &#8211; redux</h3>
+<pre>package main
+
+import "net/http"
+
+type Route struct {
+    Name        string
+    Method      string
+    Pattern     string
+    HandlerFunc http.HandlerFunc
+}
+
+type Routes []Route
+
+var routes = Routes{
+    Route{
+        "Index",
+        "GET",
+        "/",
+        Index,
+    },
+    Route{
+        "TodoIndex",
+        "GET",
+        "/todos",
+        TodoIndex,
+    },
+    Route{
+        "TodoShow",
+        "GET",
+        "/todos/{todoId}",
+        TodoShow,
+    },
+}
+</pre>
+<h3>Router.go</h3>
+<pre>package main
+
+import (
+    "net/http"
+
+    "github.com/gorilla/mux"
+)
+
+func NewRouter() *mux.Router {
+    router := mux.NewRouter().StrictSlash(true)
+    for _, route := range routes {
+        var handler http.Handler
+        handler = route.HandlerFunc
+        handler = Logger(handler, route.Name)
+
+        router.
+            Methods(route.Method).
+            Path(route.Pattern).
+            Name(route.Name).
+            Handler(handler)
+
+    }
+    return router
+}
+</pre>
+<h2>Taking Some Responsibility</h2>
+<p>Now that we have some pretty good boilerplate, it&#8217;s time to revisit our handlers. We need to be a little more responsible. We will first modify the TodoIndex by adding two lines of code:</p>
+<pre>func TodoIndex(w http.ResponseWriter, r *http.Request) {
+    todos := Todos{
+        Todo{Name: "Write presentation"},
+        Todo{Name: "Host meetup"},
+    }
+
+    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+    w.WriteHeader(http.StatusOK)
+    if err := json.NewEncoder(w).Encode(todos); err != nil {
+        panic(err)
+    }
+}
+</pre>
+<p>Two things are now happening. First, we are sending back our content type and telling the client to expect json. Second, we are explicitly setting the status code.</p>
+<p>Go&#8217;s net/http server would have tried to guess the output content type for us (it isn&#8217;t always accurate however), but since we definitively know the type, we should always set it ourselves.</p>
+<h2>Wait, Where is my Database?</h2>
+<p>Clearly if we are going to create a RESTful API, we would need somewhere to store and retrieve data. However, that is beyond the scope of this article, so we will simply create a very crude (and not thread safe) mock database.</p>
+<p>Create a file called repo.go and add the following content:</p>
+<pre>package main
+
+import "fmt"
+
+var currentId int
+
+var todos Todos
+
+// Give us some seed data
+func init() {
+    RepoCreateTodo(Todo{Name: "Write presentation"})
+    RepoCreateTodo(Todo{Name: "Host meetup"})
+}
+
+func RepoFindTodo(id int) Todo {
+    for _, t := range todos {
+        if t.Id == id {
+            return t
+        }
+    }
+    // return empty Todo if not found
+    return Todo{}
+}
+
+func RepoCreateTodo(t Todo) Todo {
+    currentId += 1
+    t.Id = currentId
+    todos = append(todos, t)
+    return t
+}
+
+func RepoDestroyTodo(id int) error {
+    for i, t := range todos {
+        if t.Id == id {
+            todos = append(todos[:i], todos[i+1:]...)
+            return nil
+        }
+    }
+    return fmt.Errorf("Could not find Todo with id of %d to delete", id)
+}
+</pre>
+<h3>Add ID to Todo</h3>
+<p>Now that we have a &#8220;mock&#8221; database, we are using and assigning id, so we will have to update our Todo struct accordingly.</p>
+<pre>package main
+
+import "time"
+
+type Todo struct {
+    Id        int       `json:"id"`
+    Name      string    `json:"name"`
+    Completed bool      `json:"completed"`
+    Due       time.Time `json:"due"`
+}
+
+type Todos []Todo</pre>
+<h3>Update our TodoIndex</h3>
+<p>To use the database, we will need to now retrieve the data in our TodoIndex by modifying the following function:</p>
+<pre>func TodoIndex(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+    w.WriteHeader(http.StatusOK)
+    if err := json.NewEncoder(w).Encode(todos); err != nil {
+        panic(err)
+    }
+}
+</pre>
+<h3>Posting JSON</h3>
+<p>So far, we have only output JSON, now it&#8217;s time to take in and store some JSON.</p>
+<p>Add the following route to the routes.go file:</p>
+<pre>Route{
+    "TodoCreate",
+    "POST",
+    "/todos",
+    TodoCreate,
+},
+</pre>
+<h3>The Create endpoint</h3>
+<p>Now we have to add the create endpoint to the handlers file.</p>
+<pre>func TodoCreate(w http.ResponseWriter, r *http.Request) {
+    var todo Todo
+    body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+    if err != nil {
+        panic(err)
+    }
+    if err := r.Body.Close(); err != nil {
+        panic(err)
+    }
+    if err := json.Unmarshal(body, &amp;todo); err != nil {
+        w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+        w.WriteHeader(422) // unprocessable entity
+        if err := json.NewEncoder(w).Encode(err); err != nil {
+            panic(err)
+        }
+    }
+
+    t := RepoCreateTodo(todo)
+    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+    w.WriteHeader(http.StatusCreated)
+    if err := json.NewEncoder(w).Encode(t); err != nil {
+        panic(err)
+    }
+}
+</pre>
+<p>The first thing we do is open up the body of the request. Notice that we use io.LimitReader. This is a good way to protect against malicious attacks on your server. Imagine if someone wanted to send you 500GBs of json!</p>
+<p>After we have read the body, we then Unmarshal it to our Todo struct. If that fails, we will do the right thing and not only respond with the appropriate status code, 422, but we will also send back the error in a json string. This will allow the client to understand not only that something went wrong, but we have the ability to communicate specifically what went wrong.</p>
+<p>Finally, if all has gone well, we send back the status code of 201, which means that the entity was successfully created. We also send back the json representation of entity we created, as it contains an id that the client will likely need for their next step.</p>
+<h3>Post some JSON</h3>
+<p>Now that we have our fake repo and our &#8220;create&#8221; endpoint, it&#8217;s time to post some data. I use curl to do so via the following command:</p>
+<pre>curl -H "Content-Type: application/json" -d '{"name":"New Todo"}' http://localhost:8080/todos
+Now, if you go to http://localhost/todos we should see the following response:
+[
+    {
+        "id": 1,
+        "name": "Write presentation",
+        "completed": false,
+        "due": "0001-01-01T00:00:00Z"
+    },
+    {
+        "id": 2,
+        "name": "Host meetup",
+        "completed": false,
+        "due": "0001-01-01T00:00:00Z"
+    },
+    {
+        "id": 3,
+        "name": "New Todo",
+        "completed": false,
+        "due": "0001-01-01T00:00:00Z"
+    }
+]
+</pre>
+<h2>Things We Didn&#8217;t Do</h2>
+<p>While we are off to a great start, there is a lot left to do. Things we haven&#8217;t addressed are:</p>
+<ul>
+<li>Version Control &#8211; What if we need to modify the API and that results in a breaking change? Might we add /v1/prefix to all our routes to start with?</li>
+<li>Authentication &#8211; Unless this is a free/public API, we probably need some authentication. I suggest learning about <a href="http://jwt.io/" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">JSON web tokens</a></li>
+</ul>
+<p>eTags &#8211; If you are building something that needs to scale, you will likely need to implement <a href="http://en.wikipedia.org/wiki/HTTP_ETag" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">eTags</a></p>
+<h2>What Else is Left?</h2>
+<p>As with all projects, things start off small but can quickly spiral out of control. If I was going to take this to the next level and make it production ready, these are just some of the additional things to do:</p>
+<ul>
+<li>Lots of refactoring!</li>
+<li>Create packages for several of these files, such as some JSON helpers, decorators, handlers, and more.</li>
+<li>Testing&#8230; oh yes, you can&#8217;t forget that. We didn&#8217;t do ANY testing here. For a production system, this is a must.</li>
+</ul>
+<h2>Can I get the Code?</h2>
+<p>Yes! Here is a repo with all of the code samples used in this post:</p>
+<p><a href="https://github.com/corylanou/tns-restful-json-api" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">https://github.com/corylanou/tns-restful-json-api</a></p>
+<h2>Summary</h2>
+<p>The most important thing to me is to remember to be build a responsible API. Sending back proper status codes, content headers, etc is critical to having your API widely adopted. I hope this post gets you started on your own API soon!</p>
+<p class="attribution"><a href="http://twitter.com/corylanou" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">C</a><a href="http://twitter.com/corylanou" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">ory LaNou</a> is an experienced software developer with over two decades of experience, and two and a half years of production <a href="http://golang.org/" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">Go</a> experience. He is currently a lead instructor at <a href="http://galvanize.it/school" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">gSchool</a> where he teaches Go and leads the local Denver Go meetup, aptly called <a href="http://www.meetup.com/Denver-Go-Language-User-Group/" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">Denver Gophers</a>.</p>
+<p class="attribution"> Feature image from <a href="http://startupitis.blogspot.com/2012/05/golang-its-amazing.html" class="ext-link" rel="external " onclick="this.target=&#039;_blank&#039;;">Startupitis</a>. The image is available on the site to download as wallpaper.</p>
+			</div>
+
+			
+		</div>
+
+
+		<footer class="entry-footer">
+
+			<div class="newtags"><a href="https://thenewstack.io/tag/apis/" class="taglinks">APIs</a><a href="https://thenewstack.io/tag/development/" class="taglinks">Development</a><a href="https://thenewstack.io/tag/go/" class="taglinks">go</a><a href="https://thenewstack.io/tag/golang/" class="taglinks">Golang</a><a href="https://thenewstack.io/tag/json/" class="taglinks">JSON</a><a href="https://thenewstack.io/tag/restful-api/" class="taglinks">restful api</a></div>
+
+			<div class="social-footer">
+				<div class="postshare">
+					<div class="social-header">
+						<!-- Simple Share Buttons Adder (7.3.10) simplesharebuttons.com --><div class="ssba ssba-wrap"><div style="text-align:left"><a data-site="" class="ssba_twitter_share" href="http://twitter.com/share?url=https://thenewstack.io/make-a-restful-json-api-go/&amp;text=Making%20a%20RESTful%20JSON%20API%20in%20Go%20"  target=&quot;_blank&quot; ><img src="https://thenewstack.io/wp-content/plugins/simple-share-buttons-adder/buttons/somacro/twitter.png" title="Twitter" class="ssba ssba-img" alt="Tweet about this on Twitter" /></a><a data-site="reddit" class="ssba_reddit_share" href="http://reddit.com/submit?url=https://thenewstack.io/make-a-restful-json-api-go/&amp;title=Making a RESTful JSON API in Go"  target=&quot;_blank&quot; ><img src="https://thenewstack.io/wp-content/plugins/simple-share-buttons-adder/buttons/somacro/reddit.png" title="Reddit" class="ssba ssba-img" alt="Share on Reddit" /></a><a data-site="" class="ssba_facebook_share" href="http://www.facebook.com/sharer.php?u=https://thenewstack.io/make-a-restful-json-api-go/"  target="_blank" ><img src="https://thenewstack.io/wp-content/plugins/simple-share-buttons-adder/buttons/somacro/facebook.png" title="Facebook" class="ssba ssba-img" alt="Share on Facebook" /></a><a data-site="linkedin" class="ssba_linkedin_share ssba_share_link" href="http://www.linkedin.com/shareArticle?mini=true&amp;url=https://thenewstack.io/make-a-restful-json-api-go/"  target=&quot;_blank&quot; ><img src="https://thenewstack.io/wp-content/plugins/simple-share-buttons-adder/buttons/somacro/linkedin.png" title="LinkedIn" class="ssba ssba-img" alt="Share on LinkedIn" /></a></div></div>						<div class="commentcloud">
+
+							
+	            			<a id="showbox" href="//thenewstack.io/make-a-restful-json-api-go/#disqus_thread" >+</a>
+
+	    				</div>
+					</div>
+				</div>
+			</div>
+
+		</footer>
+
+
+	</div>
+
+</article>
+
+</main>
+
+</div>
+
+
+
+
+
+<script>
+	
+	jQuery(document).ready(function($) {
+		
+		$('.newsletter-sign-up-button').on('click', function(event) {
+		
+			var email = $('.newsletter-sign-up-input').val();
+			
+			if (!email) return alert('You must enter a valid email.');
+			if (!validator.isEmail(email)) return alert('You must enter a valid email.');
+			
+			$.post('/newsletter-sign-up-submit', {
+				email : email
+			}, function(result) {
+			
+				if (result === 'ERROR') return alert('An error occurred, please try again momentarily.');
+				
+				$('.newsletter-sign-up-input').val('');
+				alert('Thank you for subscribing.');
+				
+			});
+		
+		});
+		
+	});
+	
+</script>
+
+
+<div class="newsletter-sign-up">
+	<div class="newsletter-sign-up-block">
+		
+		<img src="https://cdn.thenewstack.io/static/img/The-New-Stack-Updates-Logo.svg"><BR>
+		
+		<H3>A digest of the week’s most important stories & analyses.</H3>
+		
+		<div class="newsletter-sign-up-form">
+			<input class="newsletter-sign-up-input" type="email" placeholder="Email Address"><button class="newsletter-sign-up-button">Subscribe</button><BR>
+			<div class="newsletter-sign-up-no-spam">We don’t sell or share your email. Occasionally, we send updates and useful info.</div>
+		</div>
+	
+	</div>
+</div>
+
+
+
+
+
+<div class="related-posts">
+	<div class="related-posts-wrapper">
+
+		<div class="sectionheader">Related Stories</div>
+
+		
+<div class="normalstory-box">
+	
+	<div class="commentcloud">
+		<h5 class="links">
+	        	        <a href="//thenewstack.io/github-predicts-hottest-2018-open-source-trends/#disqus_thread">+</a>
+	    </h5>
+	</div>
+	
+	<a href="https://thenewstack.io/github-predicts-hottest-2018-open-source-trends/" class="athumbnail">
+		
+			    
+		<div class="normalstory-overlay" style="display: none;">
+			<img src="">
+		</div>
+		
+		
+		<img width="290" height="120" src="https://storage.googleapis.com/cdn.thenewstack.io/media/2018/02/07c58127-c7b20970-githubtrends2018-290x120.jpg" class="attachment-normal size-normal wp-post-image wp-stateless-item" alt="" data-image-size="normal" data-stateless-media-bucket="cdn.thenewstack.io" data-stateless-media-name="media/2018/02/07c58127-c7b20970-githubtrends2018.jpg" />		
+	</a>
+
+	<header class="title-row">
+		
+		<h4>
+	        <a href="https://thenewstack.io/category/analysis/" alt="View all posts in Analysis">Analysis</a> / <a href="https://thenewstack.io/category/research/" alt="View all posts in Research">Research</a> / <a href="https://thenewstack.io/category/top_story/" alt="View all posts in Top Stories">Top Stories</a> / <a href="https://thenewstack.io/region/global/" rel="tag">Global</a> 	    </h4>
+	
+		<h2 class="small">
+			<a href="https://thenewstack.io/github-predicts-hottest-2018-open-source-trends/">GitHub Predicts Hottest 2018 Open Source Trends</a>
+		</h2>
+		
+		<h4 class="timestamp">8:58am,
+	
+		 by <span class="links">
+	
+				<a href="https://thenewstack.io/author/michelle_gienow/" title="Posts by Michelle Gienow" class="author url fn" rel="author">Michelle Gienow</a>	
+	        </span>
+        
+	</header>
+
+</div>
+
+
+
+<div class="normalstory-box">
+	
+	<div class="commentcloud">
+		<h5 class="links">
+	        	        <a href="//thenewstack.io/week-programming-machine-learning-hullabaloo/#disqus_thread">+</a>
+	    </h5>
+	</div>
+	
+	<a href="https://thenewstack.io/week-programming-machine-learning-hullabaloo/" class="athumbnail">
+		
+			    
+		<div class="normalstory-overlay" style="display: none;">
+			<img src="">
+		</div>
+		
+		
+		<img width="290" height="120" src="https://storage.googleapis.com/cdn.thenewstack.io/media/2018/02/b53aaf6f-walnut-3072681_640-290x120.jpg" class="attachment-normal size-normal wp-post-image wp-stateless-item" alt="" data-image-size="normal" data-stateless-media-bucket="cdn.thenewstack.io" data-stateless-media-name="media/2018/02/b53aaf6f-walnut-3072681_640.jpg" />		
+	</a>
+
+	<header class="title-row">
+		
+		<h4>
+	        <a href="https://thenewstack.io/category/digest/" alt="View all posts in Digest">Digest</a> / <a href="https://thenewstack.io/category/technology/" alt="View all posts in Technology">Technology</a> / <a href="https://thenewstack.io/category/top_story/" alt="View all posts in Top Stories">Top Stories</a> / <a href="https://thenewstack.io/region/global/" rel="tag">Global</a> 	    </h4>
+	
+		<h2 class="small">
+			<a href="https://thenewstack.io/week-programming-machine-learning-hullabaloo/">This Week in Programming: All That Machine Learning Hullabaloo</a>
+		</h2>
+		
+		<h4 class="timestamp">17 Feb 2018 6:00am,
+	
+		 by <span class="links">
+	
+				<a href="https://thenewstack.io/author/mike-melanson/" title="Posts by Mike Melanson" class="author url fn" rel="author">Mike Melanson</a>	
+	        </span>
+        
+	</header>
+
+</div>
+
+
+
+	</div>
+</div>
+
+				<div class="comment-block">
+					<div id="comments" class="comments-area">
+						<div class="button-wrapper">
+							<div class="showDisqus">View / Add Comments</div>
+						</div>
+						<h4 class="attribution">
+							Please stay on topic and be respectful of others.
+							Review our <a href="/terms-of-use">Terms of Use</a>.
+						</h4>
+		        		<div id="disqus_thread"></div>
+					</div>
+				</div>
+
+		
+		
+
+			<div class="sponsored-feed">
+				<div class="related-posts-wrapper rss-block">
+				<div class="sectionheader">Sponsored Feed</div>
+					<div class="singlerss-wrap"><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://blog.openshift.com/podcast-podctl-26-kubernetes-myths-misperceptions-part-ii/" ><img src="https://cdn.thenewstack.io/media/2016/05/f5138a03-red-hat-openshift@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://blog.openshift.com/podcast-podctl-26-kubernetes-myths-misperceptions-part-ii/" >[Podcast] PodCTL #26 – Kubernetes Myths & Misperceptions – Part II</a></div><span class="date">February 19, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://www.cloudfoundry.org/blog/compute-the-quantiles-of-any-distribution/" ><img src="https://cdn.thenewstack.io/media/2016/04/CloudFoundry@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://www.cloudfoundry.org/blog/compute-the-quantiles-of-any-distribution/" >Compute the quantiles of any distribution</a></div><span class="date">February 19, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://blog.chef.io/2018/02/19/chef-community-summit-berlin-2018/" ><img src="https://cdn.thenewstack.io/media/2017/05/d217cf09-chef@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://blog.chef.io/2018/02/19/chef-community-summit-berlin-2018/" >Chef Community Summit Berlin – 2018</a></div><span class="date">February 19, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://azure.microsoft.com/blog/last-week-in-azure-week-of-2018-02-12/" ><img src="https://cdn.thenewstack.io/media/2017/09/d698b495-microsoft@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://azure.microsoft.com/blog/last-week-in-azure-week-of-2018-02-12/" >Last week in Azure: Azure SDK for Go GA, and more</a></div><span class="date">February 19, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://www.influxdata.com/blog/news-the-new-stack-influxdata-timely-one/" ><img src="https://cdn.thenewstack.io/media/2017/09/d89d8e1a-influxdata@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://www.influxdata.com/blog/news-the-new-stack-influxdata-timely-one/" >In the News: The New Stack | This Week in News: InfluxData’s Timely One</a></div><span class="date">February 17, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://buoyant.io/2018/02/16/linkerd-expands-community-roles-second-birthday/" ><img src="https://cdn.thenewstack.io/media/2017/12/74b5316c-buoyant@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://buoyant.io/2018/02/16/linkerd-expands-community-roles-second-birthday/" >Linkerd expands community roles for its second birthday</a></div><span class="date">February 16, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="http://superuser.openstack.org/articles/thank_bot/" ><img src="https://cdn.thenewstack.io/media/2017/06/bded1ace-openstack@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="http://superuser.openstack.org/articles/thank_bot/" >For a happier open source community, give recognition</a></div><span class="date">February 16, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://www.cncf.io/blog/2018/02/16/january-2018-opentracing-project-newsletter/" ><img src="https://cdn.thenewstack.io/media/2016/08/CNCF@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://www.cncf.io/blog/2018/02/16/january-2018-opentracing-project-newsletter/" >January 2018: OpenTracing Project Newsletter</a></div><span class="date">February 16, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://blog.thecodeteam.com/2018/02/16/context-switching-made-easy-under-kubernetes-powered-docker-for-mac-18-02-0-collabnix/" ><img src="https://cdn.thenewstack.io/media/2017/09/a323b4e8-code@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://blog.thecodeteam.com/2018/02/16/context-switching-made-easy-under-kubernetes-powered-docker-for-mac-18-02-0-collabnix/" >Context Switching Made Easy under Kubernetes powered Docker for Mac 18.02.0 – Collabnix</a></div><span class="date">February 16, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://www.linuxfoundation.org/blog/craig-mcluckie-kubernetes-community-driven-path/" ><img src="https://cdn.thenewstack.io/media/2017/07/b22fecc6-linuxfoundation@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://www.linuxfoundation.org/blog/craig-mcluckie-kubernetes-community-driven-path/" >Craig McLuckie on Kubernetes and its Community-Driven Path</a></div><span class="date">February 16, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://www.twistlock.com/2018/02/15/cryptomining-malware-emerges/" ><img src="https://cdn.thenewstack.io/media/2017/06/87a847e8-twistlock@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://www.twistlock.com/2018/02/15/cryptomining-malware-emerges/" >Cryptomining Malware Emerges</a></div><span class="date">February 15, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://blog.codeship.com/4-tips-for-successful-remote-1-1s/" ><img src="https://cdn.thenewstack.io/media/2017/04/3dc0848f-codeship@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://blog.codeship.com/4-tips-for-successful-remote-1-1s/" >4 Tips for Successful Remote 1-1s</a></div><span class="date">February 15, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://blog.aquasec.com/cryptocurrency-miners-abusing-containers-anatomy-of-an-attempted-attack" ><img src="https://cdn.thenewstack.io/media/2017/11/c3612d7d-aquasecurity@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://blog.aquasec.com/cryptocurrency-miners-abusing-containers-anatomy-of-an-attempted-attack" >Cryptocurrency Miners Abusing Containers: Anatomy of an (Attempted) Attack</a></div><span class="date">February 15, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://circleci.com/blog/headless-chrome-more-reliable-efficient-browser-testing/" ><img src="https://cdn.thenewstack.io/media/2018/01/d2f23bca-circleci@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://circleci.com/blog/headless-chrome-more-reliable-efficient-browser-testing/" >Headless Chrome for More Reliable, Efficient Browser Testing</a></div><span class="date">February 15, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://www.pagerduty.com/blog/security-incident-responder/" ><img src="https://cdn.thenewstack.io/media/2017/04/042245f3-pagerduty@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://www.pagerduty.com/blog/security-incident-responder/" >Life as a Security Incident Responder</a></div><span class="date">February 15, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://portworx.com/ha-mysql-openshift/" ><img src="https://cdn.thenewstack.io/media/2018/01/69778945-portworx@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://portworx.com/ha-mysql-openshift/" >How to run an HA MySQL database on OpenShift</a></div><span class="date">February 14, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="http://feedproxy.google.com/~r/ClPlBl/~3/NlkvrqFL0x8/96-vCPU-Compute-Engine-instances-are-now-generally-available.html" ><img src="https://cdn.thenewstack.io/media/2017/08/e1fec4a5-googlecloud@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="http://feedproxy.google.com/~r/ClPlBl/~3/NlkvrqFL0x8/96-vCPU-Compute-Engine-instances-are-now-generally-available.html" >96 vCPU Compute Engine instances are now generally available</a></div><span class="date">February 14, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="http://www.apmdigest.com/apmacademy/is-your-website-stacking-up-to-customer-expectations" ><img src="https://cdn.thenewstack.io/media/2017/04/6c31aa38-ca@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="http://www.apmdigest.com/apmacademy/is-your-website-stacking-up-to-customer-expectations" >Is Your Website Stacking Up to Customer Expectations?</a></div><span class="date">February 14, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://saltstack.com/saltstack-completes-series-a-financing-round-led-by-mercato-partners-bringing-total-funding-to-28-million/#utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=saltstack-completes-series-a-financing-round-led-by-mercato-partners-bringing-total-funding-to-28-million" ><img src="https://cdn.thenewstack.io/media/2018/02/24ab5c36-saltstack@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://saltstack.com/saltstack-completes-series-a-financing-round-led-by-mercato-partners-bringing-total-funding-to-28-million/#utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=saltstack-completes-series-a-financing-round-led-by-mercato-partners-bringing-total-funding-to-28-million" >SaltStack Completes Series A Financing Round Led by Mercato Partners Bringing Total Funding to $28 Million</a></div><span class="date">February 14, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://blog.digitalocean.com/write-for-donations/" ><img src="https://cdn.thenewstack.io/media/2014/04/DigitalOcean@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://blog.digitalocean.com/write-for-donations/" >Make a Lasting Impact with "Write for DOnations"</a></div><span class="date">February 13, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://puppet.com/blog/our-predictions-2018-cloud-containers-devops-and-more" ><img src="https://cdn.thenewstack.io/media/2017/10/b0438c93-puppet@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://puppet.com/blog/our-predictions-2018-cloud-containers-devops-and-more" >Our predictions for 2018: the cloud, containers, DevOps and more</a></div><span class="date">February 13, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://mesosphere.com/blog/apache-mesos-1-5-released/" ><img src="https://cdn.thenewstack.io/media/2016/04/Mesosphere@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://mesosphere.com/blog/apache-mesos-1-5-released/" >Apache Mesos 1.5 Improves Storage, Performance, Resource Management, and Containerization</a></div><span class="date">February 12, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://bluemedora.com/two-leading-hypervisors-one-pane-of-glass/" ><img src="https://cdn.thenewstack.io/media/2018/02/c0bdce8a-bluemedora@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://bluemedora.com/two-leading-hypervisors-one-pane-of-glass/" >Two leading hypervisors, one pane of glass</a></div><span class="date">February 07, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://www.stackrox.com/post/2018/02/frenemies-no-more-containers-are-changing-the-security-business-relationship/" ><img src="https://cdn.thenewstack.io/media/2017/07/2b16e98a-stackrox@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://www.stackrox.com/post/2018/02/frenemies-no-more-containers-are-changing-the-security-business-relationship/" >Frenemies No More: Containers Are Changing the Security-Business Relationship</a></div><span class="date">February 06, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="http://coreos.com/blog/announcing-etcd-3.3" ><img src="https://cdn.thenewstack.io/media/2015/04/CoreOS@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="http://coreos.com/blog/announcing-etcd-3.3" >Announcing etcd 3.3, with improvements to stability, performance, and more</a></div><span class="date">February 01, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://blog.containership.io/containership-3-multicloud-mobile-kubernetes" ><img src="https://cdn.thenewstack.io/media/2017/05/4b0ac4d6-containership@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://blog.containership.io/containership-3-multicloud-mobile-kubernetes" >Containership 3.0: Multicloud Mobile Kubernetes Management</a></div><span class="date">January 30, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://wso2.com/blogs/thesource/2018/01/we-did-it-wso2-identity-server-is-now-open-id-certified/" ><img src="https://cdn.thenewstack.io/media/2018/01/5e8bc8be-wso2@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://wso2.com/blogs/thesource/2018/01/we-did-it-wso2-identity-server-is-now-open-id-certified/" >We Did It! WSO2 Identity Server is Now OpenID Certified</a></div><span class="date">January 25, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://blogs.univa.com/2018/01/openshift-commons-gathering/" ><img src="https://cdn.thenewstack.io/media/2016/12/436744b5-navops@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://blogs.univa.com/2018/01/openshift-commons-gathering/" >Openshift Commons Gathering</a></div><span class="date">January 24, 2018</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="http://blog.wercker.com/chatops-in-development" ><img src="https://cdn.thenewstack.io/media/2016/10/wercker@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="http://blog.wercker.com/chatops-in-development" >Slacking Test Notifications</a></div><span class="date">December 22, 2017</span><br /></div></div><div class="rss-unit"><div class="rss-logo"><div class="imagefix" style="float:none;"><a  target="_blank" href="https://community.hpe.com/t5/Grounded-in-the-Cloud/HPE-Synergy-and-Ormuco-Accelerating-delivery-of-an-OpenStack/ba-p/6979777" ><img src="https://cdn.thenewstack.io/media/2015/01/HP_Helion@2x.png"></a></div></div><div class="rss-title"><div class="title"><a target="_blank" href="https://community.hpe.com/t5/Grounded-in-the-Cloud/HPE-Synergy-and-Ormuco-Accelerating-delivery-of-an-OpenStack/ba-p/6979777" >HPE Synergy and Ormuco: Accelerating delivery of an OpenStack hybrid cloud</a></div><span class="date">December 07, 2017</span><br /></div></div></div>				</div>
+			</div>
+		
+
+<div class="footer-wrap">
+
+	<footer id="colophon" class="site-footer" role="contentinfo">
+
+	    <div id="mainfooter">
+
+			<div class="clearfix">
+
+		        <div class="footercol">
+		            <div id="nav_menu-8"><h4>Topic Hubs</h4><div class="menu-topic-hubs-container"><ul id="menu-topic-hubs" class="menu"><li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937477"><a href="https://thenewstack.io/tag/architecture/">Architecture</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937478"><a href="https://thenewstack.io/tag/data/">Data</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937479"><a href="https://thenewstack.io/tag/development/">Development</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937480"><a href="https://thenewstack.io/tag/diy/">Do-It-Yourself</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937481"><a href="https://thenewstack.io/tag/operations/">Operations</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937482"><a href="https://thenewstack.io/tag/security/">Security</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937483"><a href="https://thenewstack.io/tag/tech-culture/">Tech Culture</a></li>
+</ul></div></div>		        </div>
+
+		        <div class="footercol">
+		            <div id="nav_menu-9"><h4>Ecosystems</h4><div class="menu-ecosystems-container"><ul id="menu-ecosystems" class="menu"><li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937484"><a href="https://thenewstack.io/tag/artificial-intelligence/">AI</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937485"><a href="https://thenewstack.io/tag/cloud/">Cloud</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937486"><a href="https://thenewstack.io/tag/containers/">Containers</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937487"><a href="https://thenewstack.io/tag/kubernetes/">Kubernetes</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937488"><a href="https://thenewstack.io/tag/microservices/">Microservices</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937489"><a href="https://thenewstack.io/tag/node-js/">Node.js</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-post_tag menu-item-1937490"><a href="https://thenewstack.io/tag/serverless/">Serverless</a></li>
+</ul></div></div>		        </div>
+
+		        <div class="footercol">
+					<div id="nav_menu-10"><h4>Content</h4><div class="menu-sections-container"><ul id="menu-sections" class="menu"><li id="menu-item-1937808" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-1937808"><a href="https://thenewstack.io/category/analysis/">Analysis</a></li>
+<li id="menu-item-2546387" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-2546387"><a href="https://thenewstack.io/ebooks/">Ebooks</a></li>
+<li id="menu-item-880524" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-880524"><a href="https://thenewstack.io/events/">Events</a></li>
+<li id="menu-item-880407" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-880407"><a href="https://thenewstack.io/podcasts/">Podcasts</a></li>
+<li id="menu-item-1937809" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-1937809"><a href="https://thenewstack.io/category/research/">Research</a></li>
+</ul></div></div>		        </div>
+
+		        <div class="footercol">
+		            <div id="nav_menu-7"><h4>The New Stack</h4><div class="menu-the-new-stack-container"><ul id="menu-the-new-stack" class="menu"><li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-600"><a href="https://thenewstack.io/about-2/">About</a></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-601"><a href="https://thenewstack.io/contact/">Contact</a></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3543938"><a href="https://thenewstack.io/contributions/">Contributions</a></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-602"><a href="https://thenewstack.io/sponsors/">Sponsors</a></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-764345"><a href="https://thenewstack.io/privacy-policy/">Privacy Policy</a></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3543937"><a href="https://thenewstack.io/terms-of-use/">Terms of Use</a></li>
+</ul></div></div>		        </div>
+
+			</div>
+
+	    </div>
+
+	    <div class="footer-social-nav">
+			<div class="menu-follow-container"><ul id="footer-follow" class="menu"><li class="twitter menu-item menu-item-type-custom menu-item-object-custom menu-item-583"><a target="_blank" href="https://twitter.com/thenewstack">Twitter</a></li>
+<li class="facebook menu-item menu-item-type-custom menu-item-object-custom menu-item-584"><a target="_blank" href="https://www.facebook.com/thenewstack">Facebook</a></li>
+<li class="youtube menu-item menu-item-type-custom menu-item-object-custom menu-item-224124"><a target="_blank" href="https://www.youtube.com/channel/UCWea_KfCnTMD39uQuA5TKOQ">YouTube</a></li>
+<li class="soundcloud menu-item menu-item-type-custom menu-item-object-custom menu-item-880401"><a target="_blank" href="https://soundcloud.com/search?q=the%20new%20stack">Soundcloud</a></li>
+<li class="linkedin menu-item menu-item-type-custom menu-item-object-custom menu-item-586"><a target="_blank" href="https://www.linkedin.com/company/6611720">LinkedIn</a></li>
+<li class="slideshare menu-item menu-item-type-custom menu-item-object-custom menu-item-880402"><a target="_blank" href="http://www.slideshare.net/TheNewStack">Slideshare</a></li>
+<li class="rss menu-item menu-item-type-custom menu-item-object-custom menu-item-1767"><a target="_blank" href="http://thenewstack.io/rss-feeds">RSS</a></li>
+</ul></div>	    </div>
+
+	    <div class="site-info">
+	        <h4>&copy; 2018 The New Stack. All rights reserved.</h4>
+	    </div>
+
+	</footer>
+
+
+
+	        <script type="text/javascript">
+        // <![CDATA[
+        var disqus_shortname = 'thenewstack';
+        (function () {
+            var nodes = document.getElementsByTagName('span');
+            for (var i = 0, url; i < nodes.length; i++) {
+                if (nodes[i].className.indexOf('dsq-postid') != -1 && nodes[i].parentNode.tagName == 'A') {
+                    nodes[i].parentNode.setAttribute('data-disqus-identifier', nodes[i].getAttribute('data-dsqidentifier'));
+                    url = nodes[i].parentNode.href.split('#', 1);
+                    if (url.length == 1) { url = url[0]; }
+                    else { url = url[1]; }
+                    nodes[i].parentNode.href = url + '#disqus_thread';
+                }
+            }
+            var s = document.createElement('script');
+            s.async = true;
+            s.type = 'text/javascript';
+            s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+            (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+        }());
+        // ]]>
+        </script>
+        <script type="text/javascript">
+    adroll_adv_id = "N5U6YTQS3VHWDAOX4QEAOP";
+    adroll_pix_id = "FQK73G2NDFC5TLARVUPP25";
+    (function () {
+        var _onload = function(){
+            if (document.readyState && !/loaded|complete/.test(document.readyState)){setTimeout(_onload, 10);return}
+            if (!window.__adroll_loaded){__adroll_loaded=true;setTimeout(_onload, 50);return}
+            var scr = document.createElement("script");
+            var host = (("https:" == document.location.protocol) ? "https://s.adroll.com" : "http://a.adroll.com");
+            scr.setAttribute('async', 'true');
+            scr.type = "text/javascript";
+            scr.src = host + "/j/roundtrip.js";
+            ((document.getElementsByTagName('head') || [null])[0] ||
+                document.getElementsByTagName('script')[0].parentNode).appendChild(scr);
+        };
+        if (window.addEventListener) {window.addEventListener('load', _onload, false);}
+        else {window.attachEvent('onload', _onload)}
+    }());
+</script>
+
+
+<!-- Google Tag Manager -->
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-WGF7MX"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WGF7MX');</script>
+<!-- End Google Tag Manager -->
+
+<!-- Facebook Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','//connect.facebook.net/en_US/fbevents.js');
+
+fbq('init', '1667886366787627');
+fbq('track', "PageView");</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1667886366787627&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Facebook Pixel Code -->
+
+<script type="text/javascript">
+_linkedin_data_partner_id = "26441";
+</script><script type="text/javascript">
+(function(){var s = document.getElementsByTagName("script")[0];
+var b = document.createElement("script");
+b.type = "text/javascript";b.async = true;
+b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
+s.parentNode.insertBefore(b, s);})();
+</script><link rel='stylesheet' id='simple-share-buttons-adder-ssba-css'  href='https://thenewstack.io/wp-content/plugins/simple-share-buttons-adder/css/ssba.css?ver=4.9.3' type='text/css' media='all' />
+<style id='simple-share-buttons-adder-ssba-inline-css' type='text/css'>
+	.ssba {
+									
+									
+									
+									
+								}
+								.ssba img
+								{
+									width: 35px !important;
+									padding: 6px;
+									border:  0;
+									box-shadow: none !important;
+									display: inline !important;
+									vertical-align: middle;
+									box-sizing: unset;
+								}
+								
+								.ssba .fb-save
+								{
+								padding: 6px;
+								line-height: 30px;
+								}
+								.ssba, .ssba a
+								{
+									text-decoration:none;
+									background: none;
+									font-family: Indie Flower;
+									font-size: 20px;
+									
+									font-weight: bold;
+								}
+								
+</style>
+<link rel='stylesheet' id='frontend-css'  href='https://thenewstack.io/wp-content/plugins/wp-rss-multi-importer/css/frontend.css?ver=4.9.3' type='text/css' media='all' />
+<script type='text/javascript' src='https://checkout.stripe.com/checkout.js'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/stripe-checkout-pro/assets/js/vendor/parsley.min.js?ver=2.3.7'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/stripe-checkout-pro/assets/js/vendor/moment.min.js?ver=2.3.7'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/stripe-checkout-pro/assets/js/vendor/pikaday.min.js?ver=2.3.7'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/stripe-checkout-pro/assets/js/vendor/pikaday-jquery.min.js?ver=2.3.7'></script>
+<script type='text/javascript'>
+/* <![CDATA[ */
+var sc_coup = {"ajaxurl":"https:\/\/thenewstack.io\/wp-admin\/admin-ajax.php"};
+var sc_script = null;
+/* ]]> */
+</script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/stripe-checkout-pro/assets/js/public-main.min.js?ver=2.3.7'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/simple-share-buttons-adder/js/ssba.js?ver=4.9.3'></script>
+<script type='text/javascript'>
+Main.boot( [] );
+</script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/themes/thenewstack/js/navigation.js?ver=20120206'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/themes/thenewstack/js/skip-link-focus-fix.js?ver=20130115'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/themes/thenewstack/js/equalHeight.js?ver=20120232'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/themes/thenewstack/inc/responsive-tables/responsive-tables.js?ver=20120206'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/themes/thenewstack/js/script.js?ver=4.9.3'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/page-links-to/js/new-tab.min.js?ver=2.9.8'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/cyclone-slider-2/libs/cycle2/jquery.cycle2.min.js?ver=2.10.0'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/cyclone-slider-2/libs/cycle2/jquery.cycle2.carousel.min.js?ver=2.10.0'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/cyclone-slider-2/libs/cycle2/jquery.cycle2.swipe.min.js?ver=2.10.0'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/cyclone-slider-2/libs/cycle2/jquery.cycle2.tile.min.js?ver=2.10.0'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/cyclone-slider-2/libs/cycle2/jquery.cycle2.video.min.js?ver=2.10.0'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/cyclone-slider-2/templates/dark/script.js?ver=2.10.0'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/cyclone-slider-2/templates/thumbnails/script.js?ver=2.10.0'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/cyclone-slider-2/js/client.js?ver=2.10.0'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-includes/js/wp-embed.min.js?ver=4.9.3'></script>
+<script type='text/javascript' src='https://thenewstack.io/wp-content/plugins/wp-rss-multi-importer/scripts/show-excerpt.js?ver=4.9.3'></script>
+
+
+
+	<script>
+
+		(function trackOutbounds() {
+
+			var hitCallbackHandler = function(url,win) {
+			    if (win) {
+				    window.open(url, win);
+			    } else {
+		        	window.location.href = url;
+		        }
+		    };
+
+		    var addEvent = function(el, eventName, handler) {
+
+				if (el.addEventListener) {
+					el.addEventListener(eventName, handler);
+				} else {
+					el.attachEvent('on' + eventName, function(){
+						handler.call(el);
+				    });
+				}
+			}
+
+			if (document.getElementsByTagName) {
+
+				var el = document.getElementsByTagName('a');
+				var getDomain = document.domain.split('.').reverse()[1] + '.' + document.domain.split('.').reverse()[0];
+
+				// Look thru each a element
+				for (var i=0; i < el.length;i++) {
+
+					// Extract it's href attribute
+					var href = (typeof(el[i].getAttribute('href')) == 'string' ) ? el[i].getAttribute('href') : '';
+
+					// Query the href for the top level domain (xxxxx.com)
+					var myDomain = href.match(getDomain);
+
+					// If link is outbound and is not to this domain
+					if ((href.match(/^(https?:|\/\/)/i)  && !myDomain) || href.match(/^mailto\:/i)) {
+
+						// Add an event to click
+						addEvent(el[i],'click', function(e) {
+
+							var url = this.getAttribute('href');
+							var win = (typeof(this.getAttribute('target')) == 'string') ? this.getAttribute('target') : '';
+
+							var targetURL = document.createElement('a');
+							targetURL.href = url;
+							//targetURL.protocol; // => "http:"
+							//targetURL.hostname; // => "example.com"
+							//targetURL.port;     // => "3000"
+							//targetURL.pathname; // => "/pathname/"
+							//targetURL.search;   // => "?search=test"
+							//targetURL.hash;     // => "#hash"
+							//targetURL.host;     // => "example.com:3000"
+
+							console.log('Outbound Traffic ' + targetURL.hostname + ' ' + url);
+
+							ga('send', 'event', 'Outbound Traffic', targetURL.hostname, url,
+								{ 'hitCallback' : hitCallbackHandler(url,win) },
+								{ 'nonInteraction': 1 }
+							);
+
+							e.preventDefault();
+
+						});
+
+					}
+				}
+			}
+		})();
+
+		jQuery(document).ready(function($) {
+		
+			/// Track RSS ckicks
+			$('.rss-unit').on('click', function() {
+
+				var url = $(this).children('.rss-title')
+						  .children('.title').children('a').attr('href');
+
+				ga('send', 'event', 'RSS Outbound Traffic', url);
+
+			});
+
+			/// Track publish date in GA
+			var postDate = $('#post-date').text().replace(/^\s+|\s+$/g, '');
+			var postTitle = $('#post-title').text().replace(/^\s+|\s+$/g, '');
+
+			if (postTitle !== '' && postDate !== '') {
+
+				console.log('event','Date Published', postTitle, postDate);
+
+				ga('send', {
+					hitType : 'event',
+					eventCategory : 'Date Published',
+					eventAction : postTitle,
+					eventLabel : postDate,
+					nonInteraction : true
+				});
+
+			}
+
+			/// Track tags in GA
+			var tags = $('#post-tags').text();
+			tags = tags.replace(/,\s*$/, '');
+			tags = tags.replace(/\r?\n|\r/g,'');
+			tags = tags.replace(/\s/g,'');
+			tags = tags.split(',');
+			var i = 0;
+
+			var postTagHitToGA = setInterval(function() {
+
+				if (i >= tags.length) {
+					clearInterval(postTagHitToGA);
+					return false;
+				}
+
+				if(tags[i]) {
+					ga('send', {
+						hitType : 'event',
+						eventCategory : 'Tag Hit',
+						eventAction : tags[i],
+						nonInteraction : true
+					});
+				}
+
+				i++;
+
+			}, 500);
+
+		});
+
+	</script>
+
+	
+
+
+<script id="dsq-count-scr" src="//thenewstack.disqus.com/count.js" async></script>
+
+<script type="text/javascript">
+
+	jQuery(document).ready(function($) {
+		
+		clearInterval(window.showHideComments);
+		window.showHideComments = setInterval(function() {
+		
+			$('.normalstory-box .commentcloud').each(function () {
+				
+				var commentCountLink = $(this).find('h5 a');
+				var storyCommentCount = commentCountLink.html();
+				
+				if ( storyCommentCount != '+' ) {
+					$(this).show();
+				}
+			
+			});
+		
+		}, 999);
+		
+		$('.normalstory-box .commentcloud .links a').click(function(event) {
+			event.preventDefault();
+			window.location = '//' + window.location.hostname + this.pathname + '#disqus_thread';
+		});
+		
+		
+		
+		$('.postshare .links #showbox').each(function() {
+		    if ( $(this).html == '' ) $(this).html = '+';
+			$(this).show();
+		});
+		
+		$('.postshare .links #showbox').click(function(event) {
+			event.preventDefault();
+		});
+		
+		
+		
+		function loadDisqusComments() {
+		
+			$('html, body').stop().animate({
+			    scrollLeft : $('.comment-block').offset().left,
+			    scrollTop : $('.comment-block').offset().top
+			}, 999, function() {
+				
+				$.ajax ({
+			        type : 'GET',
+			        url : '//' + disqus_shortname + '.disqus.com/embed.js',
+			        dataType : 'script',
+			        cache : true
+			    });
+				
+			    $('.showDisqus').fadeOut();
+			
+			});
+		
+		}
+		
+		
+		
+		/// Auto-show comments if the URL contains '#disqus_thread'
+		if( window.location.href.indexOf('#disqus_thread') > -1 ) {
+			loadDisqusComments()
+		}
+		
+		
+		$('.social-header .commentcloud').on('click', function(event) {
+			event.preventDefault();
+			loadDisqusComments()
+		});
+		
+		
+		$('.social-footer .commentcloud').on('click', function(event) {
+			event.preventDefault();
+			loadDisqusComments()
+		});
+		
+		
+		/// View/Add Comments Button
+		$('.showDisqus').on('click', function(event) {
+			event.preventDefault();
+			loadDisqusComments()
+		});
+		
+		
+		$('.postshare .links').click(function(event) {
+			event.preventDefault();
+			loadDisqusComments()
+		});
+	
+	});
+
+</script>
+
+
+
+</div>
+
+</body>
+</html>
