@@ -1,8 +1,6 @@
 # Website
 [thenewstack.io](https://thenewstack.io/make-a-restful-json-api-go/)
 
-***
-
 In this post, we will not only cover how to use Go to create a RESTful JSON API, but we will also talk about good RESTful design. If you have ever consumed an API in the past that doesn’t follow good design, then you end up writing bad code to consume a bad API. Hopefully, after this article you will have a better idea of what a well behaved API should look like.
 
 # What is a JSON API?
@@ -35,9 +33,9 @@ Running this example will spin up a server on port 8080, and can be accessed at 
 # Things We Didn’t Do
 While we are off to a great start, there is a lot left to do. Things we haven’t addressed are:
 
-Version Control – What if we need to modify the API and that results in a breaking change? Might we add /v1/prefix to all our routes to start with?
-Authentication – Unless this is a free/public API, we probably need some authentication. I suggest learning about JSON web tokens
-eTags – If you are building something that needs to scale, you will likely need to implement eTags
+1. Version Control – What if we need to modify the API and that results in a breaking change? Might we add /v1/prefix to all our routes to start with?
+1. Authentication – Unless this is a free/public API, we probably need some authentication. I suggest learning about JSON web tokens
+1. eTags – If you are building something that needs to scale, you will likely need to implement eTags
 
 # What Else is Left?
 As with all projects, things start off small but can quickly spiral out of control. If I was going to take this to the next level and make it production ready, these are just some of the additional things to do:
