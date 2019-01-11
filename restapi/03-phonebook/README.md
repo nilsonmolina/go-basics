@@ -1,4 +1,4 @@
 # Website
-[codementor.io](https://www.codementor.io/codehakase/building-a-restful-api-with-golang-a6yivzqdo)
+[codementor.io](https://medium.com/@thedevsaddam/build-restful-api-service-in-golang-using-gin-gonic-framework-85b1a6e176f3)
 
-Unfortunately, this was not a very good article.  I was able to reenforce some of my knowledge, by fixing some of the mistakes, but I would not use this code as a boilerplate in any way whatsoever.
+In my opinion, this was NOT a very good article.  I was able to reinforce some of my knowledge by fixing some of the mistakes, but I would not use this code as a boilerplate.
